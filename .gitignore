@@ -1,0 +1,9 @@
+compressLog.log
+*.xcscheme
+*.DS_Store
+ijkversion.*
+xcuserdata
+
+/Build
+/DerivedData
+/Index
