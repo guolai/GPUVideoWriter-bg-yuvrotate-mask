@@ -16,6 +16,7 @@
 		14A96FF824230ACC000EC183 /* SSZAVAssetExportSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 14A96FF724230ACC000EC183 /* SSZAVAssetExportSession.m */; };
 		14A97012242362FF000EC183 /* 04.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14A9700F242362FF000EC183 /* 04.jpg */; };
 		14A970292423952F000EC183 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A970282423952F000EC183 /* CoreImage.framework */; };
+		14A9702E2423AF40000EC183 /* SSZGPUContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 14A9702D2423AF40000EC183 /* SSZGPUContext.m */; };
 		BC11C28315BCBE2300E5BEC7 /* WID-small.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BC11C28215BCBE2300E5BEC7 /* WID-small.jpg */; };
 		BCB3C43A16BCA871003D26B0 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = BCB3C43516BCA871003D26B0 /* Icon-72.png */; };
 		BCB3C43B16BCA871003D26B0 /* Icon-72@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BCB3C43616BCA871003D26B0 /* Icon-72@2x.png */; };
@@ -52,6 +53,8 @@
 		14A96FF724230ACC000EC183 /* SSZAVAssetExportSession.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SSZAVAssetExportSession.m; sourceTree = "<group>"; };
 		14A9700F242362FF000EC183 /* 04.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 04.jpg; sourceTree = "<group>"; };
 		14A970282423952F000EC183 /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
+		14A9702C2423AF40000EC183 /* SSZGPUContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SSZGPUContext.h; sourceTree = "<group>"; };
+		14A9702D2423AF40000EC183 /* SSZGPUContext.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SSZGPUContext.m; sourceTree = "<group>"; };
 		BC11C28215BCBE2300E5BEC7 /* WID-small.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "WID-small.jpg"; sourceTree = "<group>"; };
 		BCB3C43516BCA871003D26B0 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "../../SharedIcons/Icon-72.png"; sourceTree = "<group>"; };
 		BCB3C43616BCA871003D26B0 /* Icon-72@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72@2x.png"; path = "../../SharedIcons/Icon-72@2x.png"; sourceTree = "<group>"; };
@@ -146,6 +149,8 @@
 				BCB5DDE714E868C0000AF3C2 /* SimpleVideoFileFilterViewController.xib */,
 				BCB5DDD514E86899000AF3C2 /* Supporting Files */,
 				143C99C32421FA7200DC2041 /* SSZVideoRenderFilter.h */,
+				14A9702C2423AF40000EC183 /* SSZGPUContext.h */,
+				14A9702D2423AF40000EC183 /* SSZGPUContext.m */,
 				143C99C42421FA7200DC2041 /* SSZVideoRenderFilter.m */,
 				143C99CA2422047300DC2041 /* SSZOpenGLTools.h */,
 				143C99CB2422047300DC2041 /* SSZOpenGLTools.m */,
@@ -258,6 +263,7 @@
 				143C99CC2422047300DC2041 /* SSZOpenGLTools.m in Sources */,
 				BCB5DDDB14E86899000AF3C2 /* main.m in Sources */,
 				143C99CF24221C1700DC2041 /* SSZGPUFrameBuffer.m in Sources */,
+				14A9702E2423AF40000EC183 /* SSZGPUContext.m in Sources */,
 				BCB5DDDF14E86899000AF3C2 /* SimpleVideoFileFilterAppDelegate.m in Sources */,
 				BCB5DDE814E868C0000AF3C2 /* SimpleVideoFileFilterViewController.m in Sources */,
 				143C99C52421FA7200DC2041 /* SSZVideoRenderFilter.m in Sources */,

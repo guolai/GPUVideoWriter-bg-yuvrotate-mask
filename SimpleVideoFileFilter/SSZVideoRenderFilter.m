@@ -9,6 +9,7 @@
 #import "SSZVideoRenderFilter.h"
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
+#import "SSZGPUContext.h"
 
 
 
@@ -230,7 +231,7 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
         glDeleteTextures(1, &_bgTexture);
         _bgTexture = 0;
     }
-    
+    [[SSZGPUContext shareInstance] purgeAllUnassignedFramebuffers];
     _eaglContext = nil;
 }
 
@@ -253,18 +254,8 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
 #pragma mark - Private
 
 - (void)createGLContext {
-    self.eaglContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
-    if (!self.eaglContext)
-        self.eaglContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-    if (![EAGLContext setCurrentContext:self.eaglContext]) {
-        NSLog(@"set currentContext failed");
-    }
-    glDisable(GL_DEPTH_TEST);
-   
-    CVReturn error = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, self.eaglContext, NULL, &_coreVideoTextureCache);
-    if (error) {
-        NSAssert(NO, @"Error at CVOpenGLESTextureCacheCreate %d", error);
-    }
+    self.eaglContext = [SSZGPUContext shareInstance].glContext;
+    _coreVideoTextureCache = [SSZGPUContext shareInstance].coreVideoTextureCache;
 }
 
 - (void)linkShaderProgram {
