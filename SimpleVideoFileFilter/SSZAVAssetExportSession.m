@@ -23,6 +23,7 @@
 @property (nonatomic, strong) dispatch_queue_t inputQueue;
 @property (nonatomic, assign, readwrite) CMTime lastSamplePresentationTime;
 @property (nonatomic, strong) void (^completionHandler)(SSZAVAssetExportSession *);
+@property (nonatomic, strong, readwrite) SSZVideoRenderFilter *videoRenderFilter;
 
 
 @end
@@ -392,6 +393,20 @@
     }
 }
 
+- (SSZVideoRenderFilter *)videoRenderFilter {
+    if(!_videoRenderFilter) {
+        _videoRenderFilter = [[SSZVideoRenderFilter alloc] init];
+        _videoRenderFilter.videoSize = self.videoSize;
+    }
+    return _videoRenderFilter;
+}
+
+- (CGSize)videoSize {
+    CGFloat width = [[self.videoSettings objectForKey:AVVideoWidthKey] floatValue];
+    CGFloat heith = [[self.videoSettings objectForKey:AVVideoHeightKey] floatValue];
+    return CGSizeMake(width, heith);
+}
+
 - (void)reset {
     _error = nil;
     self.progress = 0;
@@ -405,6 +420,8 @@
     self.inputQueue = nil;
     self.completionHandler = nil;
 }
+
+
 
 
 @end

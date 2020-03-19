@@ -22,10 +22,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL ignoreAspectRatio;
 @property (nonatomic, strong) UIImage *bgImage;
 @property (nonatomic, strong) UIImage *maskImage;
-//@property (nonatomic, assign) SSZVideoRotationMode inputRotation;
 @property (nonatomic, assign, readonly) CVOpenGLESTextureCacheRef coreVideoTextureCache;
 
-
+- (void)updateMaskImageFrame:(CGRect)frame;
 - (CVPixelBufferRef)renderVideo:(CMSampleBufferRef)sampleBuffer;
 
 @end

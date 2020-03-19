@@ -83,7 +83,9 @@ NSString *const kSSZVideoMaskFragmentShaderString = SHADER_STRING
  varying highp vec2 textureCoordinate;
  uniform sampler2D inputImageTexture;
  uniform sampler2D inputImageTexture2;
-
+ uniform vec2 maskSize;
+ uniform vec2 maskPostion;
+ 
  vec4 blendColor(in highp vec4 dstColor, in highp vec4 srcColor)
   {
      vec3 vOne = vec3(1.0, 1.0, 1.0);
@@ -95,10 +97,10 @@ NSString *const kSSZVideoMaskFragmentShaderString = SHADER_STRING
  void main()
  {
      vec4 bgColor = texture2D(inputImageTexture, textureCoordinate);
-     float width = 0.1;
-     float height = 0.1;
-     if(textureCoordinate.x > 0.5 && textureCoordinate.x < 0.5 + width && textureCoordinate.y > 0.5 && textureCoordinate.y < 0.5 + height) {
-         vec2 uv = textureCoordinate - vec2(0.5,0.5);
+     float width = maskSize.x;
+     float height = maskSize.y;
+     if(textureCoordinate.x > maskPostion.x && textureCoordinate.x < maskPostion.x + width && textureCoordinate.y > maskPostion.y && textureCoordinate.y < maskPostion.y + height) {
+         vec2 uv = textureCoordinate - vec2(maskPostion.x,maskPostion.y);
          vec4 srcColor = texture2D(inputImageTexture2, vec2(uv.x / width , uv.y / height));
          bgColor = blendColor(bgColor, srcColor);
      }
@@ -181,6 +183,10 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     GLint _maskTextureCoordinateAttribute;
     GLint _maskInputTextureUniform;
     GLint _maskInputTextureUniform2;
+    GLint _maskSizeUnform;
+    GLint _maskPostionUnform;
+    GLfloat _sizeArray[2];
+    GLfloat _postionArray[2];
     
 }
 @property (nonatomic, strong) EAGLContext *eaglContext;
@@ -290,6 +296,8 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     _maskTextureCoordinateAttribute = glGetAttribLocation(shaderProgram, "inputTextureCoordinate");
     _maskInputTextureUniform = glGetUniformLocation(shaderProgram, "inputImageTexture");
     _maskInputTextureUniform2 = glGetUniformLocation(shaderProgram, "inputImageTexture2");
+    _maskSizeUnform = glGetUniformLocation(shaderProgram, "maskSize");
+    _maskPostionUnform = glGetUniformLocation(shaderProgram, "maskPostion");
     
 
  
@@ -338,6 +346,9 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, self.maskTexture);
     glUniform1i(_maskInputTextureUniform2, 2);
+    
+    glUniform2fv(_maskSizeUnform, 1, _sizeArray);
+    glUniform2fv(_maskPostionUnform, 1, _postionArray);
 
     glVertexAttribPointer(_maskPositionAttribute, 2, GL_FLOAT, 0, 0, normalVertices);
     glVertexAttribPointer(_maskTextureCoordinateAttribute, 2, GL_FLOAT, 0, 0, normalTextureCoordinates);
@@ -570,6 +581,9 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
 }
 
 - (void)setBgImage:(UIImage *)bgImage {
+    if(_bgImage == bgImage){
+        return;
+    }
     _bgImage = bgImage;
     if(_bgTexture > 0) {
         glDeleteTextures(1, &_bgTexture);
@@ -578,11 +592,21 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
 }
 
 - (void)setMaskImage:(UIImage *)maskImage {
+    if(_maskImage == maskImage){
+        return;
+    }
     _maskImage = maskImage;
     if(_maskTexture > 0) {
         glDeleteTextures(1, &_maskTexture);
     }
     _maskTexture = [SSZOpenGLTools createTextureWithImage:_maskImage];
+}
+
+- (void)updateMaskImageFrame:(CGRect)frame {
+    _sizeArray[0] = frame.size.width / self.videoSize.width;
+    _sizeArray[1] = frame.size.height / self.videoSize.height;
+    _postionArray[0] = frame.origin.x / self.videoSize.width;
+    _postionArray[1] = frame.origin.y / self.videoSize.height;
 }
 
 @end

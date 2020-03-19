@@ -12,6 +12,7 @@
 @property (nonatomic, assign) BOOL bUserCIImage;
 @property (nonatomic, strong) UIImage *bgImage;
 @property (nonatomic, strong) UIImage *waterMaskImage;
+@property (nonatomic, assign) CGFloat angle;
 
 @end
 
@@ -140,16 +141,7 @@
     exporter.outputURL = movieURL;
     exporter.videoSettings = [SimpleVideoFileFilterViewController videoSettings:self.videoSize];
     exporter.audioSettings = [SimpleVideoFileFilterViewController audioSettings];
-    
-    SSZVideoRenderFilter *videoRenderFilter = [[SSZVideoRenderFilter alloc] init];
-    videoRenderFilter.bgImage = self.bgImage;
-    videoRenderFilter.maskImage = self.waterMaskImage;
-    videoRenderFilter.videoSize = CGSizeMake(720, 1280);
-    CGAffineTransform transform = CGAffineTransformScale(CGAffineTransformIdentity, 0.5, 0.5);
-    transform = CGAffineTransformRotate(transform, 2);
-    videoRenderFilter.affineTransform = transform;
-    
-    exporter.videoRenderFilter = videoRenderFilter;
+    self.angle = 2.0;
     NSDate *date = [NSDate date];
     NSLog(@"视频保存 开始");
     __weak typeof(self) weakself = self;
@@ -159,16 +151,28 @@
             strongSelf.progressLabel.text = [NSString stringWithFormat:@"%d%%", (int)(progress * 100)];
         });
     };
-//    exporter.exportHandleSampleBufferBlock = ^BOOL(SSZAVAssetExportSession *exportSession, CMSampleBufferRef sampleBuffer, AVAssetWriterInputPixelBufferAdaptor *videoPixelBufferAdaptor) {
-//        exportSession.videoRenderFilter.assetWriterPixelBufferInput = videoPixelBufferAdaptor;
-//        CVPixelBufferRef processedPixelBuffer = [exportSession.videoRenderFilter renderVideo:sampleBuffer];
-//        BOOL bRet = YES;
-//        if (![videoPixelBufferAdaptor appendPixelBuffer:processedPixelBuffer withPresentationTime:exportSession.lastSamplePresentationTime]) {
-//            bRet = NO;
-//            NSLog(@"error 2222");
-//        }
-//        return bRet;
-//    };
+    exporter.exportHandleSampleBufferBlock = ^BOOL(SSZAVAssetExportSession *exportSession, CMSampleBufferRef sampleBuffer, AVAssetWriterInputPixelBufferAdaptor *videoPixelBufferAdaptor) {
+         __strong typeof(self) strongSelf = weakself;
+        exportSession.videoRenderFilter.bgImage = strongSelf.bgImage;
+        exportSession.videoRenderFilter.maskImage = strongSelf.waterMaskImage;
+        [exportSession.videoRenderFilter updateMaskImageFrame:CGRectMake(strongSelf.videoSize.width - 100, strongSelf.videoSize.height - 100, 50, 50)];
+        CGAffineTransform transform = CGAffineTransformScale(CGAffineTransformIdentity, 0.5, 0.5);
+        transform = CGAffineTransformRotate(transform, strongSelf.angle);
+        strongSelf.angle += 0.1;
+        if(strongSelf.angle > 6.2) {
+            strongSelf.angle = 0.1;
+        }
+        exportSession.videoRenderFilter.affineTransform = transform;
+        exportSession.videoRenderFilter.assetWriterPixelBufferInput = videoPixelBufferAdaptor;
+        CVPixelBufferRef processedPixelBuffer = [exportSession.videoRenderFilter renderVideo:sampleBuffer];
+        BOOL bRet = YES;
+        if (![videoPixelBufferAdaptor appendPixelBuffer:processedPixelBuffer withPresentationTime:exportSession.lastSamplePresentationTime]) {
+            bRet = NO;
+            NSLog(@"error 2222");
+        }
+        return bRet;
+    };
+
     [exporter exportAsynchronouslyWithCompletionHandler:^(SSZAVAssetExportSession *exportSession){
         if (exporter.error)  {
             NSLog(@"视频保存Asset失败：%@", exporter.error);
@@ -248,7 +252,6 @@
 {
     return AVFileTypeMPEG4;
 }
-
 
 
 

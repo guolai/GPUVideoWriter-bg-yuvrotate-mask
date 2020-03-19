@@ -31,8 +31,9 @@ typedef BOOL(^SSZAVAssetExportHandleSamplebufferBlock)(SSZAVAssetExportSession *
 @property (nonatomic, strong, readonly) NSError *error;
 @property (nonatomic, assign, readonly) float progress;
 @property (nonatomic, assign, readonly) AVAssetExportSessionStatus status;
-@property (nonatomic, strong) SSZVideoRenderFilter *videoRenderFilter;
+@property (nonatomic, strong, readonly) SSZVideoRenderFilter *videoRenderFilter;
 @property (nonatomic, assign, readonly) CMTime lastSamplePresentationTime;
+@property (nonatomic, assign, readonly) CGSize videoSize;
 
 
 + (id)exportSessionWithAsset:(AVAsset *)asset;
