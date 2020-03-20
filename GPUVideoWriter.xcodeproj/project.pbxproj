@@ -51,14 +51,14 @@
 		14A9702C2423AF40000EC183 /* SSZGPUContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SSZGPUContext.h; sourceTree = "<group>"; };
 		14A9702D2423AF40000EC183 /* SSZGPUContext.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SSZGPUContext.m; sourceTree = "<group>"; };
 		BC11C28215BCBE2300E5BEC7 /* WID-small.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "WID-small.jpg"; sourceTree = "<group>"; };
-		BCB5DDCA14E86899000AF3C2 /* SimpleVideoFileFilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleVideoFileFilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BCB5DDCA14E86899000AF3C2 /* GPUVideoWriter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPUVideoWriter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BCB5DDCE14E86899000AF3C2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		BCB5DDD014E86899000AF3C2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		BCB5DDD214E86899000AF3C2 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		BCB5DDD614E86899000AF3C2 /* SimpleVideoFileFilter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SimpleVideoFileFilter-Info.plist"; sourceTree = "<group>"; };
+		BCB5DDD614E86899000AF3C2 /* GPUVideoWriter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GPUVideoWriter-Info.plist"; sourceTree = "<group>"; };
 		BCB5DDD814E86899000AF3C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BCB5DDDA14E86899000AF3C2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		BCB5DDDC14E86899000AF3C2 /* SimpleVideoFileFilter-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SimpleVideoFileFilter-Prefix.pch"; sourceTree = "<group>"; };
+		BCB5DDDC14E86899000AF3C2 /* GPUVideoWriter-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GPUVideoWriter-Prefix.pch"; sourceTree = "<group>"; };
 		BCB5DDDD14E86899000AF3C2 /* SimpleVideoFileFilterAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SimpleVideoFileFilterAppDelegate.h; sourceTree = "<group>"; };
 		BCB5DDDE14E86899000AF3C2 /* SimpleVideoFileFilterAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SimpleVideoFileFilterAppDelegate.m; sourceTree = "<group>"; };
 		BCB5DDE514E868C0000AF3C2 /* SimpleVideoFileFilterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleVideoFileFilterViewController.h; sourceTree = "<group>"; };
@@ -97,7 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				E5066F5B1855AC55008C7682 /* Default-568h@2x.png */,
-				BCB5DDD414E86899000AF3C2 /* SimpleVideoFileFilter */,
+				BCB5DDD414E86899000AF3C2 /* GPUVideoWriter */,
 				BCB5DDCD14E86899000AF3C2 /* Frameworks */,
 				BCB5DDCB14E86899000AF3C2 /* Products */,
 			);
@@ -106,7 +106,7 @@
 		BCB5DDCB14E86899000AF3C2 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BCB5DDCA14E86899000AF3C2 /* SimpleVideoFileFilter.app */,
+				BCB5DDCA14E86899000AF3C2 /* GPUVideoWriter.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -128,7 +128,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		BCB5DDD414E86899000AF3C2 /* SimpleVideoFileFilter */ = {
+		BCB5DDD414E86899000AF3C2 /* GPUVideoWriter */ = {
 			isa = PBXGroup;
 			children = (
 				14A9700F242362FF000EC183 /* 04.jpg */,
@@ -149,7 +149,7 @@
 				143C99C42421FA7200DC2041 /* SSZVideoRenderFilter.m */,
 				BCB5DDD514E86899000AF3C2 /* Supporting Files */,
 			);
-			path = SimpleVideoFileFilter;
+			path = GPUVideoWriter;
 			sourceTree = "<group>";
 		};
 		BCB5DDD514E86899000AF3C2 /* Supporting Files */ = {
@@ -158,10 +158,10 @@
 				143C99DC2422328E00DC2041 /* icon2.png */,
 				14263EE2241F99ED00A05C0F /* IMG3.MOV */,
 				BC11C28215BCBE2300E5BEC7 /* WID-small.jpg */,
-				BCB5DDD614E86899000AF3C2 /* SimpleVideoFileFilter-Info.plist */,
+				BCB5DDD614E86899000AF3C2 /* GPUVideoWriter-Info.plist */,
 				BCB5DDD714E86899000AF3C2 /* InfoPlist.strings */,
 				BCB5DDDA14E86899000AF3C2 /* main.m */,
-				BCB5DDDC14E86899000AF3C2 /* SimpleVideoFileFilter-Prefix.pch */,
+				BCB5DDDC14E86899000AF3C2 /* GPUVideoWriter-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -169,9 +169,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		BCB5DDC914E86899000AF3C2 /* SimpleVideoFileFilter */ = {
+		BCB5DDC914E86899000AF3C2 /* GPUVideoWriter */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BCB5DDE214E86899000AF3C2 /* Build configuration list for PBXNativeTarget "SimpleVideoFileFilter" */;
+			buildConfigurationList = BCB5DDE214E86899000AF3C2 /* Build configuration list for PBXNativeTarget "GPUVideoWriter" */;
 			buildPhases = (
 				BCB5DDC614E86899000AF3C2 /* Sources */,
 				BCB5DDC714E86899000AF3C2 /* Frameworks */,
@@ -181,9 +181,9 @@
 			);
 			dependencies = (
 			);
-			name = SimpleVideoFileFilter;
+			name = GPUVideoWriter;
 			productName = SimpleVideoFileFilter;
-			productReference = BCB5DDCA14E86899000AF3C2 /* SimpleVideoFileFilter.app */;
+			productReference = BCB5DDCA14E86899000AF3C2 /* GPUVideoWriter.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -200,7 +200,7 @@
 					};
 				};
 			};
-			buildConfigurationList = BCB5DDC414E86899000AF3C2 /* Build configuration list for PBXProject "SimpleVideoFileFilter" */;
+			buildConfigurationList = BCB5DDC414E86899000AF3C2 /* Build configuration list for PBXProject "GPUVideoWriter" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -213,7 +213,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BCB5DDC914E86899000AF3C2 /* SimpleVideoFileFilter */,
+				BCB5DDC914E86899000AF3C2 /* GPUVideoWriter */,
 			);
 		};
 /* End PBXProject section */
@@ -350,8 +350,8 @@
 				DEVELOPMENT_TEAM = UB6H7XT56R;
 				ENABLE_BITCODE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "SimpleVideoFileFilter/SimpleVideoFileFilter-Prefix.pch";
-				INFOPLIST_FILE = "SimpleVideoFileFilter/SimpleVideoFileFilter-Info.plist";
+				GCC_PREFIX_HEADER = "SimpleVideoFileFilter/GPUVideoWriter-Prefix.pch";
+				INFOPLIST_FILE = "SimpleVideoFileFilter/GPUVideoWriter-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hao.ye.test2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -367,8 +367,8 @@
 				DEVELOPMENT_TEAM = UB6H7XT56R;
 				ENABLE_BITCODE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "SimpleVideoFileFilter/SimpleVideoFileFilter-Prefix.pch";
-				INFOPLIST_FILE = "SimpleVideoFileFilter/SimpleVideoFileFilter-Info.plist";
+				GCC_PREFIX_HEADER = "SimpleVideoFileFilter/GPUVideoWriter-Prefix.pch";
+				INFOPLIST_FILE = "SimpleVideoFileFilter/GPUVideoWriter-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hao.ye.test2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -380,7 +380,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BCB5DDC414E86899000AF3C2 /* Build configuration list for PBXProject "SimpleVideoFileFilter" */ = {
+		BCB5DDC414E86899000AF3C2 /* Build configuration list for PBXProject "GPUVideoWriter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BCB5DDE014E86899000AF3C2 /* Debug */,
@@ -389,7 +389,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BCB5DDE214E86899000AF3C2 /* Build configuration list for PBXNativeTarget "SimpleVideoFileFilter" */ = {
+		BCB5DDE214E86899000AF3C2 /* Build configuration list for PBXNativeTarget "GPUVideoWriter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BCB5DDE314E86899000AF3C2 /* Debug */,
