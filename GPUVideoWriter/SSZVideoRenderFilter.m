@@ -170,8 +170,8 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     
     const GLfloat *_preferredConversion;
     BOOL _isFullYUVRange;
-    int _imageBufferWidth;
-    int _imageBufferHeight;
+    CGFloat _imageBufferWidth;
+    CGFloat _imageBufferHeight;
     GLuint _luminanceTexture;
     GLuint _chrominanceTexture;
     
@@ -381,8 +381,8 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     [_outputFrameBuffer activateFramebuffer];
 //   glClearColor(0.0, 0.0, 0.0, 1.0);
 //   glClear(GL_COLOR_BUFFER_BIT);
-    CGFloat normalizedHeight = self.videoSize.height / self.videoSize.width;
-
+    CGFloat normalizedHeight = _imageBufferHeight / _imageBufferWidth;
+//    CGFloat normalizedHeight = self.videoSize.height /  self.videoSize.width;
     GLfloat adjustedVertices[] = {
         -1.0f, -normalizedHeight,
         1.0f, -normalizedHeight,
@@ -442,7 +442,7 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     } else {
         [SSZOpenGLTools loadOrthoMatrix:(GLfloat *)&_orthographicMatrix left:-1.0 right:1.0 bottom:-1.0 top:1.0 near:-1.0 far:1.0];
     }
-    
+
     [SSZOpenGLTools convert3DTransform:&_transform3D toMatrix:&_transformMatrix];
     
     glUseProgram(self.program);
@@ -517,7 +517,7 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
            _imageBufferWidth = bufferWidth;
            _imageBufferHeight = bufferHeight;
        }
-
+        
        CVReturn err;
        // Y-plane
        glActiveTexture(GL_TEXTURE4);

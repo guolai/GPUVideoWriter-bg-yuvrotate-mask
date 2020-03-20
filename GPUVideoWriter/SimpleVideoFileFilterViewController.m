@@ -33,6 +33,7 @@
     self.bgImage = [UIImage imageNamed:@"04.jpg"];
     self.waterMaskImage = [UIImage imageNamed:@"icon2.png"];
     self.videoSize = CGSizeMake(720, 1280);
+//    self.videoSize = CGSizeMake(360, 640);
     [super viewDidLoad];
 }
 
@@ -66,6 +67,7 @@
     exporter.outputURL = movieURL;
     exporter.videoSettings = [SimpleVideoFileFilterViewController videoSettings:self.videoSize];
     exporter.audioSettings = [SimpleVideoFileFilterViewController audioSettings];
+    exporter.shouldPassThroughNatureSize = YES;
     NSDate *date = [NSDate date];
     NSLog(@"视频保存 开始");
     __weak typeof(self) weakself = self;
@@ -125,8 +127,8 @@
 - (void)beginOpenglWrite {
     self.bUserCIImage = NO;
   
- 
     NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"IMG3" withExtension:@"MOV"];
+//    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"hengping" withExtension:@"mp4"];
     NSString *pathToMovie = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/Movie.mp4"];
     if ([[NSFileManager defaultManager] fileExistsAtPath:pathToMovie]) {
         [[NSFileManager defaultManager] removeItemAtPath:pathToMovie error:nil];
@@ -141,6 +143,7 @@
     exporter.outputURL = movieURL;
     exporter.videoSettings = [SimpleVideoFileFilterViewController videoSettings:self.videoSize];
     exporter.audioSettings = [SimpleVideoFileFilterViewController audioSettings];
+    exporter.shouldPassThroughNatureSize = YES;
     self.angle = 2.0;
     NSDate *date = [NSDate date];
     NSLog(@"视频保存 开始");

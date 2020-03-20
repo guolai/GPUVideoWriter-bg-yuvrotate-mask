@@ -34,6 +34,7 @@ typedef BOOL(^SSZAVAssetExportHandleSamplebufferBlock)(SSZAVAssetExportSession *
 @property (nonatomic, strong, readonly) SSZVideoRenderFilter *videoRenderFilter;
 @property (nonatomic, assign, readonly) CMTime lastSamplePresentationTime;
 @property (nonatomic, assign, readonly) CGSize videoSize;
+@property (nonatomic, assign) BOOL shouldPassThroughNatureSize;//针对视频加背景，videosize并非视频自身将要输出的
 
 
 + (id)exportSessionWithAsset:(AVAsset *)asset;

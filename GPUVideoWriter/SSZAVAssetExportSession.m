@@ -295,7 +295,14 @@
             }
         }
     }
-    
+    if(self.shouldPassThroughNatureSize) {
+        if(naturalSize.width > targetSize.width *1.5) {
+            targetSize = CGSizeMake(targetSize.width *1.5, targetSize.width *1.5 * naturalSize.height / naturalSize.width);
+            //将渲染尺寸适当缩小
+        } else {
+            targetSize = naturalSize;
+        }
+    }
     videoComposition.renderSize = naturalSize;
     // center inside
     {
