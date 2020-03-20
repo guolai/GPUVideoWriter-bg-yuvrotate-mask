@@ -18,11 +18,6 @@
 		14A970292423952F000EC183 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A970282423952F000EC183 /* CoreImage.framework */; };
 		14A9702E2423AF40000EC183 /* SSZGPUContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 14A9702D2423AF40000EC183 /* SSZGPUContext.m */; };
 		BC11C28315BCBE2300E5BEC7 /* WID-small.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BC11C28215BCBE2300E5BEC7 /* WID-small.jpg */; };
-		BCB3C43A16BCA871003D26B0 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = BCB3C43516BCA871003D26B0 /* Icon-72.png */; };
-		BCB3C43B16BCA871003D26B0 /* Icon-72@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BCB3C43616BCA871003D26B0 /* Icon-72@2x.png */; };
-		BCB3C43C16BCA871003D26B0 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = BCB3C43716BCA871003D26B0 /* Icon.png */; };
-		BCB3C43D16BCA871003D26B0 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BCB3C43816BCA871003D26B0 /* Icon@2x.png */; };
-		BCB3C43E16BCA871003D26B0 /* iTunesArtwork.png in Resources */ = {isa = PBXBuildFile; fileRef = BCB3C43916BCA871003D26B0 /* iTunesArtwork.png */; };
 		BCB5DDCF14E86899000AF3C2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB5DDCE14E86899000AF3C2 /* UIKit.framework */; };
 		BCB5DDD114E86899000AF3C2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB5DDD014E86899000AF3C2 /* Foundation.framework */; };
 		BCB5DDD314E86899000AF3C2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB5DDD214E86899000AF3C2 /* CoreGraphics.framework */; };
@@ -56,11 +51,6 @@
 		14A9702C2423AF40000EC183 /* SSZGPUContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SSZGPUContext.h; sourceTree = "<group>"; };
 		14A9702D2423AF40000EC183 /* SSZGPUContext.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SSZGPUContext.m; sourceTree = "<group>"; };
 		BC11C28215BCBE2300E5BEC7 /* WID-small.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "WID-small.jpg"; sourceTree = "<group>"; };
-		BCB3C43516BCA871003D26B0 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "../../SharedIcons/Icon-72.png"; sourceTree = "<group>"; };
-		BCB3C43616BCA871003D26B0 /* Icon-72@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72@2x.png"; path = "../../SharedIcons/Icon-72@2x.png"; sourceTree = "<group>"; };
-		BCB3C43716BCA871003D26B0 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../../SharedIcons/Icon.png; sourceTree = "<group>"; };
-		BCB3C43816BCA871003D26B0 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../../SharedIcons/Icon@2x.png"; sourceTree = "<group>"; };
-		BCB3C43916BCA871003D26B0 /* iTunesArtwork.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = iTunesArtwork.png; path = ../../SharedIcons/iTunesArtwork.png; sourceTree = "<group>"; };
 		BCB5DDCA14E86899000AF3C2 /* SimpleVideoFileFilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleVideoFileFilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BCB5DDCE14E86899000AF3C2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		BCB5DDD014E86899000AF3C2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -147,17 +137,17 @@
 				BCB5DDE514E868C0000AF3C2 /* SimpleVideoFileFilterViewController.h */,
 				BCB5DDE614E868C0000AF3C2 /* SimpleVideoFileFilterViewController.m */,
 				BCB5DDE714E868C0000AF3C2 /* SimpleVideoFileFilterViewController.xib */,
-				BCB5DDD514E86899000AF3C2 /* Supporting Files */,
-				143C99C32421FA7200DC2041 /* SSZVideoRenderFilter.h */,
-				14A9702C2423AF40000EC183 /* SSZGPUContext.h */,
-				14A9702D2423AF40000EC183 /* SSZGPUContext.m */,
-				143C99C42421FA7200DC2041 /* SSZVideoRenderFilter.m */,
-				143C99CA2422047300DC2041 /* SSZOpenGLTools.h */,
-				143C99CB2422047300DC2041 /* SSZOpenGLTools.m */,
-				143C99CD24221C1700DC2041 /* SSZGPUFrameBuffer.h */,
-				143C99CE24221C1700DC2041 /* SSZGPUFrameBuffer.m */,
 				14A96FF624230ACC000EC183 /* SSZAVAssetExportSession.h */,
 				14A96FF724230ACC000EC183 /* SSZAVAssetExportSession.m */,
+				14A9702C2423AF40000EC183 /* SSZGPUContext.h */,
+				14A9702D2423AF40000EC183 /* SSZGPUContext.m */,
+				143C99CD24221C1700DC2041 /* SSZGPUFrameBuffer.h */,
+				143C99CE24221C1700DC2041 /* SSZGPUFrameBuffer.m */,
+				143C99CA2422047300DC2041 /* SSZOpenGLTools.h */,
+				143C99CB2422047300DC2041 /* SSZOpenGLTools.m */,
+				143C99C32421FA7200DC2041 /* SSZVideoRenderFilter.h */,
+				143C99C42421FA7200DC2041 /* SSZVideoRenderFilter.m */,
+				BCB5DDD514E86899000AF3C2 /* Supporting Files */,
 			);
 			path = SimpleVideoFileFilter;
 			sourceTree = "<group>";
@@ -167,11 +157,6 @@
 			children = (
 				143C99DC2422328E00DC2041 /* icon2.png */,
 				14263EE2241F99ED00A05C0F /* IMG3.MOV */,
-				BCB3C43516BCA871003D26B0 /* Icon-72.png */,
-				BCB3C43616BCA871003D26B0 /* Icon-72@2x.png */,
-				BCB3C43716BCA871003D26B0 /* Icon.png */,
-				BCB3C43816BCA871003D26B0 /* Icon@2x.png */,
-				BCB3C43916BCA871003D26B0 /* iTunesArtwork.png */,
 				BC11C28215BCBE2300E5BEC7 /* WID-small.jpg */,
 				BCB5DDD614E86899000AF3C2 /* SimpleVideoFileFilter-Info.plist */,
 				BCB5DDD714E86899000AF3C2 /* InfoPlist.strings */,
@@ -244,12 +229,7 @@
 				BC11C28315BCBE2300E5BEC7 /* WID-small.jpg in Resources */,
 				143C99DD2422328F00DC2041 /* icon2.png in Resources */,
 				14263EE3241F99ED00A05C0F /* IMG3.MOV in Resources */,
-				BCB3C43A16BCA871003D26B0 /* Icon-72.png in Resources */,
-				BCB3C43B16BCA871003D26B0 /* Icon-72@2x.png in Resources */,
-				BCB3C43C16BCA871003D26B0 /* Icon.png in Resources */,
 				14A97012242362FF000EC183 /* 04.jpg in Resources */,
-				BCB3C43D16BCA871003D26B0 /* Icon@2x.png in Resources */,
-				BCB3C43E16BCA871003D26B0 /* iTunesArtwork.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

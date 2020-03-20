@@ -187,7 +187,7 @@
 
 - (void)retrievingProgress
 {
-    self.progressLabel.text = [NSString stringWithFormat:@"%d%%", (int)(movieFile.progress * 100)];
+//    self.progressLabel.text = [NSString stringWithFormat:@"%d%%", (int)(movieFile.progress * 100)];
 }
 
 - (void)viewDidUnload
@@ -204,7 +204,7 @@
 - (IBAction)updatePixelWidth:(id)sender
 {
 //    [(GPUImageUnsharpMaskFilter *)filter setIntensity:[(UISlider *)sender value]];
-    [(GPUImagePixellateFilter *)filter setFractionalWidthOfAPixel:[(UISlider *)sender value]];
+//    [(GPUImagePixellateFilter *)filter setFractionalWidthOfAPixel:[(UISlider *)sender value]];
 }
 
 + (NSDictionary *)videoSettings:(CGSize)size

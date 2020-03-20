@@ -218,6 +218,8 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
         glDeleteProgram(_yuvProgram);
         _yuvProgram = 0;
     }
+    CVOpenGLESTextureCacheFlush(_coreVideoTextureCache, 0);
+    CFRelease(_coreVideoTextureCache);
     _outputFrameBuffer = nil;
     _maskOutputFrameBuffer = nil;
     if ([EAGLContext currentContext] == _eaglContext) {
@@ -253,9 +255,24 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
 
 #pragma mark - Private
 
+//- (void)createGLContext {
+//    self.eaglContext = [SSZGPUContext shareInstance].glContext;
+//    _coreVideoTextureCache = [SSZGPUContext shareInstance].coreVideoTextureCache;
+//}
+
 - (void)createGLContext {
-    self.eaglContext = [SSZGPUContext shareInstance].glContext;
-    _coreVideoTextureCache = [SSZGPUContext shareInstance].coreVideoTextureCache;
+    self.eaglContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
+    if (!self.eaglContext)
+        self.eaglContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+    if (![EAGLContext setCurrentContext:self.eaglContext]) {
+        NSLog(@"set currentContext failed");
+    }
+    glDisable(GL_DEPTH_TEST);
+    
+    CVReturn error = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, self.eaglContext, NULL, &_coreVideoTextureCache);
+    if (error) {
+        NSAssert(NO, @"Error at CVOpenGLESTextureCacheCreate %d", error);
+    }
 }
 
 - (void)linkShaderProgram {

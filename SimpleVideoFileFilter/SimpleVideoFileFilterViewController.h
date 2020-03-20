@@ -1,11 +1,11 @@
 #import <UIKit/UIKit.h>
-#import "GPUImage.h"
+//#import "GPUImage.h"
 
 @interface SimpleVideoFileFilterViewController : UIViewController
 {
-    GPUImageMovie *movieFile;
-    GPUImageOutput<GPUImageInput> *filter;
-    GPUImageMovieWriter *movieWriter;
+//    GPUImageMovie *movieFile;
+//    GPUImageOutput<GPUImageInput> *filter;
+//    GPUImageMovieWriter *movieWriter;
     NSTimer * timer;
 }
 
