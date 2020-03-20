@@ -18,6 +18,7 @@
 		14A970292423952F000EC183 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A970282423952F000EC183 /* CoreImage.framework */; };
 		14A9702E2423AF40000EC183 /* SSZGPUContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 14A9702D2423AF40000EC183 /* SSZGPUContext.m */; };
 		14A970402424AAE1000EC183 /* hengping.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 14A9703F2424AAE0000EC183 /* hengping.mp4 */; };
+		14A9704D2424D78F000EC183 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A9704C2424D78F000EC183 /* Photos.framework */; };
 		BC11C28315BCBE2300E5BEC7 /* WID-small.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BC11C28215BCBE2300E5BEC7 /* WID-small.jpg */; };
 		BCB5DDCF14E86899000AF3C2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB5DDCE14E86899000AF3C2 /* UIKit.framework */; };
 		BCB5DDD114E86899000AF3C2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB5DDD014E86899000AF3C2 /* Foundation.framework */; };
@@ -52,6 +53,7 @@
 		14A9702C2423AF40000EC183 /* SSZGPUContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SSZGPUContext.h; sourceTree = "<group>"; };
 		14A9702D2423AF40000EC183 /* SSZGPUContext.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SSZGPUContext.m; sourceTree = "<group>"; };
 		14A9703F2424AAE0000EC183 /* hengping.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = hengping.mp4; sourceTree = "<group>"; };
+		14A9704C2424D78F000EC183 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		BC11C28215BCBE2300E5BEC7 /* WID-small.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "WID-small.jpg"; sourceTree = "<group>"; };
 		BCB5DDCA14E86899000AF3C2 /* GPUVideoWriter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPUVideoWriter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BCB5DDCE14E86899000AF3C2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -79,6 +81,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14A9704D2424D78F000EC183 /* Photos.framework in Frameworks */,
 				14A970292423952F000EC183 /* CoreImage.framework in Frameworks */,
 				143C99DB242231FB00DC2041 /* GLKit.framework in Frameworks */,
 				BCB5DE0114E87789000AF3C2 /* OpenGLES.framework in Frameworks */,
@@ -116,6 +119,7 @@
 		BCB5DDCD14E86899000AF3C2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				14A9704C2424D78F000EC183 /* Photos.framework */,
 				14A970282423952F000EC183 /* CoreImage.framework */,
 				143C99DA242231FB00DC2041 /* GLKit.framework */,
 				BCB5DE0014E87789000AF3C2 /* OpenGLES.framework */,

@@ -1,7 +1,7 @@
 #import "SimpleVideoFileFilterViewController.h"
 #import "SSZAVAssetExportSession.h"
 #import "SSZVideoRenderFilter.h"
-
+#import <Photos/Photos.h>
 
 @interface SimpleVideoFileFilterViewController ()
 
@@ -127,8 +127,8 @@
 - (void)beginOpenglWrite {
     self.bUserCIImage = NO;
   
-    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"IMG3" withExtension:@"MOV"];
-//    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"hengping" withExtension:@"mp4"];
+//    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"IMG3" withExtension:@"MOV"];
+    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"hengping" withExtension:@"mp4"];
     NSString *pathToMovie = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/Movie.mp4"];
     if ([[NSFileManager defaultManager] fileExistsAtPath:pathToMovie]) {
         [[NSFileManager defaultManager] removeItemAtPath:pathToMovie error:nil];
@@ -159,8 +159,9 @@
         exportSession.videoRenderFilter.bgImage = strongSelf.bgImage;
         exportSession.videoRenderFilter.maskImage = strongSelf.waterMaskImage;
         [exportSession.videoRenderFilter updateMaskImageFrame:CGRectMake(strongSelf.videoSize.width - 100, strongSelf.videoSize.height - 100, 50, 50)];
-        CGAffineTransform transform = CGAffineTransformScale(CGAffineTransformIdentity, 0.5, 0.5);
-        transform = CGAffineTransformRotate(transform, strongSelf.angle);
+        CGAffineTransform transform = CGAffineTransformIdentity;
+//        CGAffineTransform transform = CGAffineTransformScale(transform, 0.5, 0.5);
+//        transform = CGAffineTransformRotate(transform, strongSelf.angle);
         strongSelf.angle += 0.1;
         if(strongSelf.angle > 6.2) {
             strongSelf.angle = 0.1;
@@ -181,6 +182,27 @@
             NSLog(@"视频保存Asset失败：%@", exporter.error);
         }
        NSLog(@"视频保存 Asset cost time %f", [[NSDate date] timeIntervalSinceDate:date]);
+        __block NSString *localIdentifier = nil;
+        [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^(void)
+         {
+            PHAssetChangeRequest *request = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:movieURL];
+            request.creationDate = [NSDate date];
+            localIdentifier = request.placeholderForCreatedAsset.localIdentifier;
+        }
+        completionHandler:^(BOOL success, NSError *error)
+         {
+            dispatch_async(dispatch_get_main_queue(), ^(void)
+                           {
+                if (error != nil)
+                {
+                    NSLog(@"[SaveTask] save video failed! error: %@", error);
+                }
+        
+                    NSLog(@"视频保存本地成功");
+              
+            });
+        }];
+        
     }];
    
 }
