@@ -160,8 +160,11 @@
         exportSession.videoRenderFilter.maskImage = strongSelf.waterMaskImage;
         [exportSession.videoRenderFilter updateMaskImageFrame:CGRectMake(strongSelf.videoSize.width - 100, strongSelf.videoSize.height - 100, 50, 50)];
         CGAffineTransform transform = CGAffineTransformIdentity;
-//        CGAffineTransform transform = CGAffineTransformScale(transform, 0.5, 0.5);
-//        transform = CGAffineTransformRotate(transform, strongSelf.angle);
+
+        transform = CGAffineTransformTranslate(transform,   .0, 0.5 * strongSelf.videoSize.height/ (strongSelf.videoSize.width));
+        transform = CGAffineTransformScale(transform, 0.4, 0.4);
+        transform = CGAffineTransformRotate(transform, strongSelf.angle);
+        
         strongSelf.angle += 0.1;
         if(strongSelf.angle > 6.2) {
             strongSelf.angle = 0.1;

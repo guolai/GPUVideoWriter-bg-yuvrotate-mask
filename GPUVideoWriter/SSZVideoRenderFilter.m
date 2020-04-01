@@ -382,7 +382,6 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
 //   glClearColor(0.0, 0.0, 0.0, 1.0);
 //   glClear(GL_COLOR_BUFFER_BIT);
     CGFloat normalizedHeight = _imageBufferHeight / _imageBufferWidth;
-//    CGFloat normalizedHeight = self.videoSize.height /  self.videoSize.width;
     GLfloat adjustedVertices[] = {
         -1.0f, -normalizedHeight,
         1.0f, -normalizedHeight,
