@@ -127,8 +127,8 @@
 - (void)beginOpenglWrite {
     self.bUserCIImage = NO;
   
-//    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"IMG3" withExtension:@"MOV"];
-    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"hengping" withExtension:@"mp4"];
+    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"IMG3" withExtension:@"MOV"];
+//    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"hengping" withExtension:@"mp4"];
     NSString *pathToMovie = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/Movie.mp4"];
     if ([[NSFileManager defaultManager] fileExistsAtPath:pathToMovie]) {
         [[NSFileManager defaultManager] removeItemAtPath:pathToMovie error:nil];
@@ -161,9 +161,9 @@
         [exportSession.videoRenderFilter updateMaskImageFrame:CGRectMake(strongSelf.videoSize.width - 100, strongSelf.videoSize.height - 100, 50, 50)];
         CGAffineTransform transform = CGAffineTransformIdentity;
 
-        transform = CGAffineTransformTranslate(transform,   .0, 0.5 * strongSelf.videoSize.height/ (strongSelf.videoSize.width));
-        transform = CGAffineTransformScale(transform, 0.4, 0.4);
-        transform = CGAffineTransformRotate(transform, strongSelf.angle);
+        transform = CGAffineTransformTranslate(transform,   .0, 1 * strongSelf.videoSize.height/ (strongSelf.videoSize.width));
+        transform = CGAffineTransformScale(transform, 0.5, 0.5);
+//        transform = CGAffineTransformRotate(transform, strongSelf.angle);
         
         strongSelf.angle += 0.1;
         if(strongSelf.angle > 6.2) {
