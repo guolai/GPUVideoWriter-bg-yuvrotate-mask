@@ -151,6 +151,7 @@
     [self.writer startWriting];
     [self.reader startReading];
     [self.writer startSessionAtSourceTime:self.timeRange.start];
+//    [self.writer startSessionAtSourceTime:kCMTimeZero];
     
     __block BOOL videoCompleted = NO;
     __block BOOL audioCompleted = NO;
@@ -213,6 +214,79 @@
                     handled = self.exportHandleSampleBufferBlock(self, sampleBuffer, self.videoPixelBufferAdaptor);
                 }
             }
+            if(self.audioOutput == output) {
+//                CMTime time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+//                double dTime = CMTimeGetSeconds(time);
+//                if(dTime > 2.0  && dTime < 20.0) {
+//                    CMBlockBufferRef buffer = CMSampleBufferGetDataBuffer(sampleBuffer);
+//                    CMItemCount numSamplesInBuffer = CMSampleBufferGetNumSamples(sampleBuffer);
+//                    AudioBufferList audioBufferList;
+//
+//                    CMSampleBufferGetAudioBufferListWithRetainedBlockBuffer(sampleBuffer,
+//                                                                            NULL,
+//                                                                            &audioBufferList,
+//                                                                            sizeof(audioBufferList),
+//                                                                            NULL,
+//                                                                            NULL,
+//                                                                            kCMSampleBufferFlag_AudioBufferList_Assure16ByteAlignment,
+//                                                                            &buffer
+//                                                                            );
+//                    //passing a live pointer to the audio buffers, try to process them in-place or we might have syncing issues.
+//                    for (int bufferCount=0; bufferCount < audioBufferList.mNumberBuffers; bufferCount++) {
+//                        SInt16 *samples = (SInt16 *)audioBufferList.mBuffers[bufferCount].mData;
+//                        memset(samples, 0, audioBufferList.mBuffers[bufferCount].mDataByteSize);
+//                    }
+//                }
+               
+//                CMTime time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+//                double dTime = CMTimeGetSeconds(time);
+//                if(dTime > 2.0  && dTime < 20.0) {
+////                    CFRelease(sampleBuffer);
+////                    return YES;
+//                    int outputBufferSize = 8192;
+//                    AudioBufferList audioBufferList = {0};
+//                    audioBufferList.mNumberBuffers = 1;
+//                    audioBufferList.mBuffers[0].mNumberChannels  = 2;
+//                    audioBufferList.mBuffers[0].mDataByteSize    = outputBufferSize;
+//                    audioBufferList.mBuffers[0].mData            = malloc(outputBufferSize * sizeof(char));
+//                    memset(audioBufferList.mBuffers[0].mData, 0, outputBufferSize * sizeof(char));
+//                    
+//                    AudioStreamBasicDescription outFormat;
+//                    memset(&outFormat, 0, sizeof(outFormat));
+//                    outFormat.mSampleRate       = 44100.0;
+//                    outFormat.mFormatID         = kAudioFormatLinearPCM;
+//                    outFormat.mFormatFlags      =  kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;;
+//                    outFormat.mBytesPerPacket   = 4;
+//                    outFormat.mFramesPerPacket  = 1;
+//                    outFormat.mBytesPerFrame    = 4;
+//                    outFormat.mChannelsPerFrame = 2;
+//                    outFormat.mBitsPerChannel   = 16;
+//                    outFormat.mReserved         = 0;
+//                    CMItemCount framesCount = CMSampleBufferGetNumSamples(sampleBuffer);
+//                    CMSampleTimingInfo timing   = {.duration= CMTimeMake(1, outFormat.mSampleRate), .presentationTimeStamp= CMSampleBufferGetPresentationTimeStamp(sampleBuffer), .decodeTimeStamp= CMSampleBufferGetDecodeTimeStamp(sampleBuffer)};
+//                   
+//                    CMFormatDescriptionRef format = CMSampleBufferGetFormatDescription(sampleBuffer);
+//                    CFRelease(sampleBuffer);
+//                    sampleBuffer = nil;
+//                    OSStatus status = CMSampleBufferCreate(kCFAllocatorDefault, nil , NO,nil,nil,format, framesCount, 1, &timing, 0, nil, &sampleBuffer);
+//                    
+//                    
+//                    error = CMSampleBufferSetDataBufferFromAudioBufferList(sampleBuffer, kCFAllocatorDefault, kCFAllocatorDefault, 0, &audioBufferList);
+//                    if (error != noErr) {
+//                        CFRelease(format);
+//                        NSLog(@"CMSampleBufferSetDataBufferFromAudioBufferList returned error: %d", (int)error);
+////                        return YES;
+//                    }
+//                    NSLog(@"%d, %@", status, sampleBuffer);
+//                    
+//                }
+////                if(dTime > 20){
+////                    sampleBuffer = [self adjustTime:sampleBuffer by:CMTimeMake(-1*100, 100)];
+////                }
+//                time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+//                NSLog(@"audio current time %f", CMTimeGetSeconds(time));
+//                sampleBuffer = [self adjustTime:sampleBuffer by:CMTimeMake(2*600, 600)];
+            }
             
             @try {
                 if (!handled && ![input appendSampleBuffer:sampleBuffer]) {
@@ -237,6 +311,23 @@
     return YES;
 }
 
+- (CMSampleBufferRef)adjustTime:(CMSampleBufferRef) sample by:(CMTime) offset {
+    CMItemCount count;
+    CMSampleBufferGetSampleTimingInfoArray(sample, 0, nil, &count);
+    CMSampleTimingInfo* pInfo = malloc(sizeof(CMSampleTimingInfo) * count);
+    CMSampleBufferGetSampleTimingInfoArray(sample, count, pInfo, &count);
+    
+    for (CMItemCount i = 0; i < count; i++) {
+        pInfo[i].decodeTimeStamp = CMTimeSubtract(pInfo[i].presentationTimeStamp, offset);
+        pInfo[i].presentationTimeStamp = CMTimeSubtract(pInfo[i].presentationTimeStamp, offset);
+    }
+    
+    CMSampleBufferRef sout;
+    CMSampleBufferCreateCopyWithNewTiming(nil, sample, count, pInfo, &sout);
+    free(pInfo);
+    
+    return sout;
+}
 
 
 - (AVMutableVideoComposition *)buildDefaultVideoComposition {
@@ -266,6 +357,7 @@
     CGSize targetSize = CGSizeMake([self.videoSettings[AVVideoWidthKey] floatValue], [self.videoSettings[AVVideoHeightKey] floatValue]);
     CGSize naturalSize = [videoTrack naturalSize];
     CGAffineTransform transform = videoTrack.preferredTransform;
+//    transform = CGAffineTransformRotate(transform, 30*M_PI_2/180.0);
     CGFloat videoAngleInDegree  = atan2(transform.b, transform.a) * 180 / M_PI;
     CGRect resultRect = CGRectApplyAffineTransform(CGRectMake(0, 0, naturalSize.width, naturalSize.height), videoTrack.preferredTransform);
 //    NSLog(@"videoAngleInDegree=%f, beforeRect=%@, afterRect=%@", videoAngleInDegree, NSStringFromCGRect(CGRectMake(0, 0, naturalSize.width, naturalSize.height)), NSStringFromCGRect(resultRect));

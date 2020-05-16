@@ -30,7 +30,7 @@
 
 - (void)viewDidLoad
 {
-    self.bgImage = [UIImage imageNamed:@"04.jpg"];
+    self.bgImage = [UIImage imageNamed:@"02.jpg"];
     self.waterMaskImage = [UIImage imageNamed:@"icon2.png"];
     self.videoSize = CGSizeMake(720, 1280);
 //    self.videoSize = CGSizeMake(360, 640);
@@ -126,8 +126,9 @@
 
 - (void)beginOpenglWrite {
     self.bUserCIImage = NO;
-  
-    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"IMG3" withExtension:@"MOV"];
+//    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"MovieGOP" withExtension:@"MP4"];
+//    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"IMG3" withExtension:@"MOV"];
+    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"testvideo3" withExtension:@"mp4"];
 //    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"hengping" withExtension:@"mp4"];
     NSString *pathToMovie = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/Movie.mp4"];
     if ([[NSFileManager defaultManager] fileExistsAtPath:pathToMovie]) {
@@ -144,7 +145,10 @@
     exporter.videoSettings = [SimpleVideoFileFilterViewController videoSettings:self.videoSize];
     exporter.audioSettings = [SimpleVideoFileFilterViewController audioSettings];
     exporter.shouldPassThroughNatureSize = YES;
-    self.angle = 2.0;
+    CMTime startTime = CMTimeMake(2*600, 600);
+    CMTime duration = CMTimeMake(20*600, 600);
+    exporter.timeRange = CMTimeRangeMake(startTime, duration);
+    self.angle = 15;
     NSDate *date = [NSDate date];
     NSLog(@"视频保存 开始");
     __weak typeof(self) weakself = self;
@@ -160,20 +164,27 @@
         exportSession.videoRenderFilter.maskImage = strongSelf.waterMaskImage;
         [exportSession.videoRenderFilter updateMaskImageFrame:CGRectMake(strongSelf.videoSize.width - 100, strongSelf.videoSize.height - 100, 50, 50)];
         CGAffineTransform transform = CGAffineTransformIdentity;
-
-        transform = CGAffineTransformTranslate(transform,   .0, 1 * strongSelf.videoSize.height/ (strongSelf.videoSize.width));
-        transform = CGAffineTransformScale(transform, 0.5, 0.5);
-//        transform = CGAffineTransformRotate(transform, strongSelf.angle);
+        NSLog(@"checkRotated 222222, %f", strongSelf.angle);
+//
+//        transform = CGAffineTransformTranslate(transform,   .0, 1 * strongSelf.videoSize.height/ (strongSelf.videoSize.width));
+        transform = CGAffineTransformScale(transform, 0.8, 0.8);
+//        transform = CGAffineTransformRotate(transform, strongSelf.angle*M_PI/180.0);
+//                transform = CGAffineTransformRotate(transform, 45*M_PI_2/180.0);
         
-        strongSelf.angle += 0.1;
-        if(strongSelf.angle > 6.2) {
-            strongSelf.angle = 0.1;
+        strongSelf.angle += 1;
+        if(strongSelf.angle > 360) {
+            strongSelf.angle = 1.0;
         }
         exportSession.videoRenderFilter.affineTransform = transform;
         exportSession.videoRenderFilter.assetWriterPixelBufferInput = videoPixelBufferAdaptor;
+//        exportSession.videoRenderFilter.bAntiAliasing = YES;
         CVPixelBufferRef processedPixelBuffer = [exportSession.videoRenderFilter renderVideo:sampleBuffer];
         BOOL bRet = YES;
-        if (![videoPixelBufferAdaptor appendPixelBuffer:processedPixelBuffer withPresentationTime:exportSession.lastSamplePresentationTime]) {
+        double fTtime = CMTimeGetSeconds(exportSession.lastSamplePresentationTime);
+        int iValue = fTtime * 6000;
+        CMTime tmpTIme = CMTimeMake(iValue, 6000);
+        NSLog(@"bob Time: %f", CMTimeGetSeconds(tmpTIme));
+        if (![videoPixelBufferAdaptor appendPixelBuffer:processedPixelBuffer withPresentationTime:tmpTIme]) {
             bRet = NO;
             NSLog(@"error 2222");
         }
@@ -200,9 +211,9 @@
                 {
                     NSLog(@"[SaveTask] save video failed! error: %@", error);
                 }
-        
+
                     NSLog(@"视频保存本地成功");
-              
+
             });
         }];
         
