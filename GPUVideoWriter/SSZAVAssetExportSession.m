@@ -151,7 +151,6 @@
     [self.writer startWriting];
     [self.reader startReading];
     [self.writer startSessionAtSourceTime:self.timeRange.start];
-//    [self.writer startSessionAtSourceTime:kCMTimeZero];
     
     __block BOOL videoCompleted = NO;
     __block BOOL audioCompleted = NO;
@@ -215,28 +214,28 @@
                 }
             }
             if(self.audioOutput == output) {
-//                CMTime time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-//                double dTime = CMTimeGetSeconds(time);
-//                if(dTime > 2.0  && dTime < 20.0) {
-//                    CMBlockBufferRef buffer = CMSampleBufferGetDataBuffer(sampleBuffer);
-//                    CMItemCount numSamplesInBuffer = CMSampleBufferGetNumSamples(sampleBuffer);
-//                    AudioBufferList audioBufferList;
-//
-//                    CMSampleBufferGetAudioBufferListWithRetainedBlockBuffer(sampleBuffer,
-//                                                                            NULL,
-//                                                                            &audioBufferList,
-//                                                                            sizeof(audioBufferList),
-//                                                                            NULL,
-//                                                                            NULL,
-//                                                                            kCMSampleBufferFlag_AudioBufferList_Assure16ByteAlignment,
-//                                                                            &buffer
-//                                                                            );
-//                    //passing a live pointer to the audio buffers, try to process them in-place or we might have syncing issues.
-//                    for (int bufferCount=0; bufferCount < audioBufferList.mNumberBuffers; bufferCount++) {
-//                        SInt16 *samples = (SInt16 *)audioBufferList.mBuffers[bufferCount].mData;
-//                        memset(samples, 0, audioBufferList.mBuffers[bufferCount].mDataByteSize);
-//                    }
-//                }
+                CMTime time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+                double dTime = CMTimeGetSeconds(time);
+                if(dTime > 2.0  && dTime < 20.0) {
+                    CMBlockBufferRef buffer = CMSampleBufferGetDataBuffer(sampleBuffer);
+                    CMItemCount numSamplesInBuffer = CMSampleBufferGetNumSamples(sampleBuffer);
+                    AudioBufferList audioBufferList;
+                    
+                    CMSampleBufferGetAudioBufferListWithRetainedBlockBuffer(sampleBuffer,
+                                                                            NULL,
+                                                                            &audioBufferList,
+                                                                            sizeof(audioBufferList),
+                                                                            NULL,
+                                                                            NULL,
+                                                                            kCMSampleBufferFlag_AudioBufferList_Assure16ByteAlignment,
+                                                                            &buffer
+                                                                            );
+                    //passing a live pointer to the audio buffers, try to process them in-place or we might have syncing issues.
+                    for (int bufferCount=0; bufferCount < audioBufferList.mNumberBuffers; bufferCount++) {
+                        SInt16 *samples = (SInt16 *)audioBufferList.mBuffers[bufferCount].mData;
+                        memset(samples, 0, audioBufferList.mBuffers[bufferCount].mDataByteSize);
+                    }
+                }
                
 //                CMTime time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
 //                double dTime = CMTimeGetSeconds(time);
@@ -285,7 +284,6 @@
 ////                }
 //                time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
 //                NSLog(@"audio current time %f", CMTimeGetSeconds(time));
-//                sampleBuffer = [self adjustTime:sampleBuffer by:CMTimeMake(2*600, 600)];
             }
             
             @try {

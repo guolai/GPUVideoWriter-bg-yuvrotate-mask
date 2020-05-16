@@ -59,44 +59,54 @@ NSString *const kSSZVideoRenderPassthroughFragmentShaderString = SHADER_STRING
 
 NSString *const kSSZVideoRenderFragmentShaderString = SHADER_STRING
 (
+ precision highp float;
  varying highp vec2 textureCoordinate;
+ 
  uniform sampler2D inputImageTexture;
  uniform sampler2D inputImageTexture2;
  uniform mediump mat3 colorConversionMatrix;
- uniform highp float width;
  
  void main()
  {
      mediump vec3 yuv;
      lowp vec3 rgb;
-     mediump vec4 bgColor = gl_LastFragData[0];
      yuv.x = texture2D(inputImageTexture, textureCoordinate).r;
      yuv.yz = texture2D(inputImageTexture2, textureCoordinate).ra - vec2(0.5, 0.5);
      rgb = colorConversionMatrix * yuv;
-     if(width > 0.0007) {
-         highp vec2 uv = (textureCoordinate - vec2(width, width)) / (1.0 - width * 2.0);
-         if(uv.x < 0.0 ) {
-             if(uv.y < 0.0) {
-                 uv.x = max(abs(uv.x), abs(uv.y));
-             } else if(uv.y > 1.0) {
-                 uv.x = max(abs(uv.x), abs(uv.y-1.0));
-             }
-             rgb = mix(rgb, bgColor.rgb, smoothstep(0.0, width, abs(uv.x)));
-         }else if(uv.x > 1.0) {
-             uv.x = abs(uv.x - 1.0);
-             if(uv.y < 0.0) {
-                 uv.x = max(uv.x, abs(uv.y));
-             } else if(uv.y > 1.0) {
-                 uv.x = max(uv.x, abs(uv.y-1.0));
-             }
-             rgb = mix(rgb, bgColor.rgb, smoothstep(0.0, width, abs(uv.x)));
-         } else if(uv.y < 0.0) {
-             rgb = mix(rgb, bgColor.rgb, smoothstep(0.0, width, abs(uv.y)));
-         } else if(uv.y > 1.0) {
-             rgb = mix(rgb, bgColor.rgb, smoothstep(0.0, width, abs(uv.y - 1.0)));
-         }
-     }
-      gl_FragColor = vec4(rgb, 1.0);
+     
+    highp float alpha = 1.0;
+//     highp float width = 3.0/720.0;
+//     highp vec2 uv = (textureCoordinate - vec2(width, width)) / (1.0 - width * 2.0);
+
+//     if(uv.x < 0.0) {
+//         if(uv.y < 0.0) {
+//             uv.x = max(abs(uv.x), abs(uv.y));
+//         } else if(uv.y > 1.0) {
+//             uv.x = max(abs(uv.x), abs(uv.y-1.0));
+//         }
+//         alpha = abs(uv.x);
+//         alpha = smoothstep(width,0.0, alpha);
+//         rgb *= alpha;
+//     } else if(uv.x > 1.0) {
+//         uv.x = abs(uv.x - 1.0);
+//         if(uv.y < 0.0) {
+//             uv.x = max(uv.x, abs(uv.y));
+//         } else if(uv.y > 1.0) {
+//             uv.x = max(uv.x, abs(uv.y-1.0));
+//         }
+//         alpha = uv.x;
+//         alpha = smoothstep(width,0.0, alpha);
+//         rgb *= alpha;
+//     } else if(uv.y < 0.0) {
+//         alpha = abs(uv.y);
+//         alpha = smoothstep(width,.0,alpha);
+//         rgb *= alpha;
+//     } else if(uv.y > 1.0) {
+//         alpha = abs(uv.y - 1.0);
+//         alpha = smoothstep(width,.0,alpha);
+//         rgb *= alpha;
+//     }
+     gl_FragColor = vec4(rgb, alpha);
  }
 );
 
@@ -186,8 +196,12 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     GLint _filterTextureCoordinateAttribute;
     GLint _filterInputTextureUniform;
     GLint _filterInputTexture2Uniform;
+    
+    GLint _yuvPositionAttribute;
+    GLint _yuvTextureCoordinateAttribute;
+    GLint _yuvInputTextureUniform;
+    GLint _yuvInputTexture2Uniform;
     GLint _yuvConversionMatrixUniform;
-    GLint _yuvAntiAliasWidthUniform;
 
     CVOpenGLESTextureCacheRef _coreVideoTextureCache;
     
@@ -217,13 +231,15 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
 @property (nonatomic, assign) GLuint program;
 @property (nonatomic, assign) GLuint maskProgram;
 @property (nonatomic, assign) GLuint yuvProgram;
+@property (nonatomic, assign) GLuint rotateProgram;
 @property (nonatomic, assign) CGFloat widthScale;
 @property (nonatomic, assign) CGFloat heightScale;
+@property (nonatomic, strong) SSZGPUFrameBuffer *yuvFrameBuffer;
 @property (nonatomic, strong) SSZGPUFrameBuffer *outputFrameBuffer;
 @property (nonatomic, strong) SSZGPUFrameBuffer *maskOutputFrameBuffer;
 @property (nonatomic, assign) GLuint maskTexture;
 @property (nonatomic, assign) GLuint bgTexture;
-@property (nonatomic, assign) BOOL bAntiAliasing;
+@property (nonatomic, assign) GLuint bgTexture2;
 
 @end
 
@@ -301,20 +317,28 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
 
 - (void)linkShaderProgram {
     
-//    GLuint shaderProgram = [SSZOpenGLTools loadProgram:kSSZVideoRenderVertexShaderString withFragmentShader:kSSZVideoRenderFragmentShaderString];
-    NSString *fragmentShaderToUse = [NSString stringWithFormat:@"#extension GL_EXT_shader_framebuffer_fetch : require\n %@",kSSZVideoRenderFragmentShaderString];
-    GLuint shaderProgram = [SSZOpenGLTools loadProgram:kSSZVideoRenderTransformVertexShaderString withFragmentShader:fragmentShaderToUse];
+    NSString *fragmentShaderPath = [[NSBundle mainBundle] pathForResource:@"fragmentShader" ofType:@"fsh"];
+    NSString *shaderString = [NSString stringWithContentsOfFile:fragmentShaderPath encoding:NSUTF8StringEncoding error:nil];
+    
+    GLuint shaderProgram = [SSZOpenGLTools loadProgram:kSSZVideoRenderVertexShaderString withFragmentShader:kSSZVideoRenderFragmentShaderString];
     glUseProgram(shaderProgram);
     self.yuvProgram = shaderProgram;
-   
+    _yuvPositionAttribute = glGetAttribLocation(shaderProgram, "position");
+    _yuvTextureCoordinateAttribute = glGetAttribLocation(shaderProgram, "inputTextureCoordinate");
+    _yuvInputTextureUniform = glGetUniformLocation(shaderProgram, "inputImageTexture");
+    _yuvInputTexture2Uniform = glGetUniformLocation(shaderProgram, "inputImageTexture2");
+    _yuvConversionMatrixUniform = glGetUniformLocation(shaderProgram, "colorConversionMatrix");
+
+    shaderProgram = [SSZOpenGLTools loadProgram:kSSZVideoRenderTransformVertexShaderString withFragmentShader:shaderString];
+    glUseProgram(shaderProgram);
+    self.rotateProgram = shaderProgram;
     _filterPositionAttribute = glGetAttribLocation(shaderProgram, "position");
     _filterTextureCoordinateAttribute = glGetAttribLocation(shaderProgram, "inputTextureCoordinate");
     _filterInputTextureUniform = glGetUniformLocation(shaderProgram, "inputImageTexture");
     _filterInputTexture2Uniform = glGetUniformLocation(shaderProgram, "inputImageTexture2");
-    _yuvConversionMatrixUniform = glGetUniformLocation(shaderProgram, "colorConversionMatrix");
     _transformMatrixUniform = glGetUniformLocation(shaderProgram, "transformMatrix");
     _orthographicMatrixUniform = glGetUniformLocation(shaderProgram, "orthographicMatrix");
-    _yuvAntiAliasWidthUniform = glGetUniformLocation(shaderProgram, "width");
+    
     
     shaderProgram = [SSZOpenGLTools loadProgram:kSSZVideoRenderVertexShaderString withFragmentShader:kSSZVideoRenderPassthroughFragmentShaderString];
     glUseProgram(shaderProgram);
@@ -332,9 +356,6 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     _maskInputTextureUniform2 = glGetUniformLocation(shaderProgram, "inputImageTexture2");
     _maskSizeUnform = glGetUniformLocation(shaderProgram, "maskSize");
     _maskPostionUnform = glGetUniformLocation(shaderProgram, "maskPostion");
-    
-
- 
 }
 
 - (void)useAsCurrentContext {
@@ -395,12 +416,50 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
 //    glDisableVertexAttribArray(_normalTextureCoordinateAttribute);
 }
 
-- (void)drawMovieFrame {
-    CGFloat fWidth = 0.0;
-    if(self.bAntiAliasing){
-        fWidth = 2./self.videoSize.width;
+- (void)drawYUVFrame {
+    if(!_yuvFrameBuffer) {
+        _yuvFrameBuffer = [[SSZGPUFrameBuffer alloc] initWithSize:CGSizeMake(self.videoSize.width, self.videoSize.height)];
+        _yuvFrameBuffer.coreVideoTextureCache = _coreVideoTextureCache;
+        [_yuvFrameBuffer prepareGPUEvent];
     }
     glUseProgram(self.yuvProgram);
+    [_yuvFrameBuffer activateFramebuffer];
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    //draw bg
+    static const GLfloat normalVertices[] = {
+        -1.0f, -1.0f,
+        1.0f, -1.0f,
+        -1.0f,  1.0f,
+        1.0f,  1.0f,
+    };
+    
+    static const GLfloat normalTextureCoordinates[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 1.0f,
+    };
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, _luminanceTexture);
+    glUniform1i(_yuvInputTextureUniform, 4);
+    
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, _chrominanceTexture);
+    glUniform1i(_yuvInputTexture2Uniform, 5);
+    
+    glUniformMatrix3fv(_yuvConversionMatrixUniform, 1, GL_FALSE, _preferredConversion);
+    glVertexAttribPointer(_yuvPositionAttribute, 2, GL_FLOAT, 0, 0, normalVertices);
+    glVertexAttribPointer(_yuvTextureCoordinateAttribute, 2, GL_FLOAT, 0, 0, normalTextureCoordinates);
+    glEnableVertexAttribArray(_yuvPositionAttribute);
+    glEnableVertexAttribArray(_yuvTextureCoordinateAttribute);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+- (void)drawMovieFrame {
+    [self drawYUVFrame];
+    glFinish();
+    glUseProgram(self.rotateProgram);
     [_outputFrameBuffer activateFramebuffer];
 //   glClearColor(0.0, 0.0, 0.0, 1.0);
 //   glClear(GL_COLOR_BUFFER_BIT);
@@ -412,12 +471,6 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
         1.0f,  normalizedHeight,
     };
     
-//    static const GLfloat squareVertices[] = {
-//        -1.0f, -1.0f,
-//        1.0f, -1.0f,
-//        -1.0f,  1.0f,
-//        1.0f,  1.0f,
-//    };
 
     static const GLfloat textureCoordinates[] = {
         0.0f, 0.0f,
@@ -427,17 +480,15 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     };
 
     glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, _luminanceTexture);
+    glBindTexture(GL_TEXTURE_2D, _yuvFrameBuffer.texture);
     glUniform1i(_filterInputTextureUniform, 4);
 
-    glActiveTexture(GL_TEXTURE5);
-    glBindTexture(GL_TEXTURE_2D, _chrominanceTexture);
-    glUniform1i(_filterInputTexture2Uniform, 5);
+//    glActiveTexture(GL_TEXTURE5);
+//    glBindTexture(GL_TEXTURE_2D, _chrominanceTexture);
+//    glUniform1i(_filterInputTexture2Uniform, 5);
     
     glUniformMatrix4fv(_transformMatrixUniform, 1, GL_FALSE, (GLfloat *)&_transformMatrix);
     glUniformMatrix4fv(_orthographicMatrixUniform, 1, GL_FALSE, (GLfloat *)&_orthographicMatrix);
-    glUniformMatrix3fv(_yuvConversionMatrixUniform, 1, GL_FALSE, _preferredConversion);
-    glUniform1f(_yuvAntiAliasWidthUniform, fWidth);
     glVertexAttribPointer(_filterPositionAttribute, 2, GL_FLOAT, 0, 0, adjustedVertices);
     glVertexAttribPointer(_filterTextureCoordinateAttribute, 2, GL_FLOAT, 0, 0, textureCoordinates);
     
@@ -453,7 +504,7 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
 
 - (CVPixelBufferRef)renderVideo:(CMSampleBufferRef)sampleBuffer {
     CVPixelBufferRef tmpPixelBuffer = nil;
-    self.bAntiAliasing = [self checkRotated];
+    
     if(!_outputFrameBuffer) {
        _outputFrameBuffer = [[SSZGPUFrameBuffer alloc] initWithSize:CGSizeMake(self.videoSize.width, self.videoSize.height)];
        _outputFrameBuffer.coreVideoTextureCache = _coreVideoTextureCache;
@@ -620,6 +671,11 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
         glDeleteTextures(1, &_bgTexture);
     }
     _bgTexture = [SSZOpenGLTools createTextureWithImage:_bgImage];
+    if(_bgTexture2 > 0) {
+        glDeleteTextures(1, &_bgTexture2);
+    }
+    UIImage *image = [UIImage imageNamed:@"04.png"];
+    _bgTexture2 = [SSZOpenGLTools createTextureWithImage:image];
 }
 
 - (void)setMaskImage:(UIImage *)maskImage {
@@ -638,19 +694,6 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     _sizeArray[1] = frame.size.height / self.videoSize.height;
     _postionArray[0] = frame.origin.x / self.videoSize.width;
     _postionArray[1] = frame.origin.y / self.videoSize.height;
-}
-
-- (BOOL)checkRotated {
-    CGAffineTransform transrom = CATransform3DGetAffineTransform(self.transform3D);
-    CGFloat rotate = atanf(transrom.b/transrom.a);
-    CGFloat degree = rotate/M_PI * 180.0 + 0.1;
-    int iMode = degree / 90.0;
-    if(fabs(degree - iMode * 90.0)< 1.0) {
-//        NSLog(@"checkRotated NO, %f", degree);
-        return NO;
-    }
-//    NSLog(@"checkRotated YES, %f", degree);
-    return YES;
 }
 
 @end

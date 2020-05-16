@@ -15,7 +15,8 @@
 		143C99DD2422328F00DC2041 /* icon2.png in Resources */ = {isa = PBXBuildFile; fileRef = 143C99DC2422328E00DC2041 /* icon2.png */; };
 		1493807D246988BB00051DFC /* MovieGOP.MP4 in Resources */ = {isa = PBXBuildFile; fileRef = 1493807C246988BB00051DFC /* MovieGOP.MP4 */; };
 		1493807F246A7EFA00051DFC /* 02.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 1493807E246A7EFA00051DFC /* 02.jpg */; };
-		14982D57246EB54800ADBB58 /* testvideo3.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 14982D56246EB54800ADBB58 /* testvideo3.mp4 */; };
+		14938081246AC04C00051DFC /* 04.png in Resources */ = {isa = PBXBuildFile; fileRef = 14938080246AC04C00051DFC /* 04.png */; };
+		14938085246BB52000051DFC /* fragmentShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 14938084246BB52000051DFC /* fragmentShader.fsh */; };
 		14A96FF824230ACC000EC183 /* SSZAVAssetExportSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 14A96FF724230ACC000EC183 /* SSZAVAssetExportSession.m */; };
 		14A97012242362FF000EC183 /* 04.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 14A9700F242362FF000EC183 /* 04.jpg */; };
 		14A970292423952F000EC183 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A970282423952F000EC183 /* CoreImage.framework */; };
@@ -51,7 +52,8 @@
 		143C99DC2422328E00DC2041 /* icon2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon2.png; sourceTree = "<group>"; };
 		1493807C246988BB00051DFC /* MovieGOP.MP4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = MovieGOP.MP4; sourceTree = "<group>"; };
 		1493807E246A7EFA00051DFC /* 02.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 02.jpg; sourceTree = "<group>"; };
-		14982D56246EB54800ADBB58 /* testvideo3.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = testvideo3.mp4; sourceTree = "<group>"; };
+		14938080246AC04C00051DFC /* 04.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 04.png; sourceTree = "<group>"; };
+		14938084246BB52000051DFC /* fragmentShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = fragmentShader.fsh; sourceTree = "<group>"; };
 		14A96FF624230ACC000EC183 /* SSZAVAssetExportSession.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SSZAVAssetExportSession.h; sourceTree = "<group>"; };
 		14A96FF724230ACC000EC183 /* SSZAVAssetExportSession.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SSZAVAssetExportSession.m; sourceTree = "<group>"; };
 		14A9700F242362FF000EC183 /* 04.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 04.jpg; sourceTree = "<group>"; };
@@ -143,6 +145,8 @@
 		BCB5DDD414E86899000AF3C2 /* GPUVideoWriter */ = {
 			isa = PBXGroup;
 			children = (
+				14938084246BB52000051DFC /* fragmentShader.fsh */,
+				14938080246AC04C00051DFC /* 04.png */,
 				1493807E246A7EFA00051DFC /* 02.jpg */,
 				14A9700F242362FF000EC183 /* 04.jpg */,
 				BCB5DDDD14E86899000AF3C2 /* SimpleVideoFileFilterAppDelegate.h */,
@@ -168,7 +172,6 @@
 		BCB5DDD514E86899000AF3C2 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				14982D56246EB54800ADBB58 /* testvideo3.mp4 */,
 				1493807C246988BB00051DFC /* MovieGOP.MP4 */,
 				14A9703F2424AAE0000EC183 /* hengping.mp4 */,
 				143C99DC2422328E00DC2041 /* icon2.png */,
@@ -242,10 +245,11 @@
 				BCB5DDD914E86899000AF3C2 /* InfoPlist.strings in Resources */,
 				BCB5DDE914E868C0000AF3C2 /* SimpleVideoFileFilterViewController.xib in Resources */,
 				E5066F5C1855AC55008C7682 /* Default-568h@2x.png in Resources */,
+				14938081246AC04C00051DFC /* 04.png in Resources */,
+				14938085246BB52000051DFC /* fragmentShader.fsh in Resources */,
 				14A970402424AAE1000EC183 /* hengping.mp4 in Resources */,
 				BC11C28315BCBE2300E5BEC7 /* WID-small.jpg in Resources */,
 				1493807F246A7EFA00051DFC /* 02.jpg in Resources */,
-				14982D57246EB54800ADBB58 /* testvideo3.mp4 in Resources */,
 				1493807D246988BB00051DFC /* MovieGOP.MP4 in Resources */,
 				143C99DD2422328F00DC2041 /* icon2.png in Resources */,
 				14263EE3241F99ED00A05C0F /* IMG3.MOV in Resources */,
