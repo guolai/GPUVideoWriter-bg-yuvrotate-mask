@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1409D1802448548F0053CFA4 /* CustomVideoCompositing.m in Sources */ = {isa = PBXBuildFile; fileRef = 1409D17F2448548F0053CFA4 /* CustomVideoCompositing.m */; };
 		14263EE3241F99ED00A05C0F /* IMG3.MOV in Resources */ = {isa = PBXBuildFile; fileRef = 14263EE2241F99ED00A05C0F /* IMG3.MOV */; };
 		143C99C52421FA7200DC2041 /* SSZVideoRenderFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 143C99C42421FA7200DC2041 /* SSZVideoRenderFilter.m */; };
 		143C99CC2422047300DC2041 /* SSZOpenGLTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 143C99CB2422047300DC2041 /* SSZOpenGLTools.m */; };
@@ -37,6 +38,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1409D17E2448548F0053CFA4 /* CustomVideoCompositing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomVideoCompositing.h; sourceTree = "<group>"; };
+		1409D17F2448548F0053CFA4 /* CustomVideoCompositing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomVideoCompositing.m; sourceTree = "<group>"; };
 		14263EE2241F99ED00A05C0F /* IMG3.MOV */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = IMG3.MOV; sourceTree = "<group>"; };
 		143C99C32421FA7200DC2041 /* SSZVideoRenderFilter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SSZVideoRenderFilter.h; sourceTree = "<group>"; };
 		143C99C42421FA7200DC2041 /* SSZVideoRenderFilter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SSZVideoRenderFilter.m; sourceTree = "<group>"; };
@@ -137,6 +140,8 @@
 		BCB5DDD414E86899000AF3C2 /* GPUVideoWriter */ = {
 			isa = PBXGroup;
 			children = (
+				1409D17E2448548F0053CFA4 /* CustomVideoCompositing.h */,
+				1409D17F2448548F0053CFA4 /* CustomVideoCompositing.m */,
 				14A9700F242362FF000EC183 /* 04.jpg */,
 				BCB5DDDD14E86899000AF3C2 /* SimpleVideoFileFilterAppDelegate.h */,
 				BCB5DDDE14E86899000AF3C2 /* SimpleVideoFileFilterAppDelegate.m */,
@@ -256,6 +261,7 @@
 				BCB5DDE814E868C0000AF3C2 /* SimpleVideoFileFilterViewController.m in Sources */,
 				143C99C52421FA7200DC2041 /* SSZVideoRenderFilter.m in Sources */,
 				14A96FF824230ACC000EC183 /* SSZAVAssetExportSession.m in Sources */,
+				1409D1802448548F0053CFA4 /* CustomVideoCompositing.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

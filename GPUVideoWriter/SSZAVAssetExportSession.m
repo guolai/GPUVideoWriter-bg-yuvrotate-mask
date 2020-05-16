@@ -7,7 +7,7 @@
 //
 
 #import "SSZAVAssetExportSession.h"
-
+#import "CustomVideoCompositing.h"
 
 @interface SSZAVAssetExportSession ()
 
@@ -155,7 +155,8 @@
     __block BOOL videoCompleted = NO;
     __block BOOL audioCompleted = NO;
     __weak typeof(self) wself = self;
-    self.inputQueue = dispatch_queue_create("VideoEncoderInputQueue", DISPATCH_QUEUE_SERIAL);
+    NSString *str = [NSString stringWithFormat:@"VideoEncoderInputQueue-%p",self];
+    self.inputQueue = dispatch_queue_create([str UTF8String], DISPATCH_QUEUE_SERIAL);
     if (videoTracks.count > 0) {
         [self.videoInput requestMediaDataWhenReadyOnQueue:self.inputQueue usingBlock:^{
              if (![wself encodeReadySamplesFromOutput:wself.videoOutput toInput:wself.videoInput]) {
@@ -241,97 +242,108 @@
 
 - (AVMutableVideoComposition *)buildDefaultVideoComposition {
     AVMutableVideoComposition *videoComposition = [AVMutableVideoComposition videoComposition];
-    AVAssetTrack *videoTrack = [[self.asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0];
-    
-    // get the frame rate from videoSettings, if not set then try to get it from the video track,
-    // if not set (mainly when asset is AVComposition) then use the default frame rate of 30
-    float trackFrameRate = 0;
-    if (self.videoSettings) {
-        NSDictionary *videoCompressionProperties = [self.videoSettings objectForKey:AVVideoCompressionPropertiesKey];
-        if (videoCompressionProperties)  {
-            NSNumber *maxKeyFrameInterval = [videoCompressionProperties objectForKey:AVVideoMaxKeyFrameIntervalKey];
-            if (maxKeyFrameInterval)  {
-                trackFrameRate = maxKeyFrameInterval.floatValue;
-            }
-        }
-    } else {
-        trackFrameRate = [videoTrack nominalFrameRate];
-    }
-    
-    if (trackFrameRate == 0) {
-        trackFrameRate = 30;
-    }
-    
-    videoComposition.frameDuration = CMTimeMake(1, trackFrameRate);
-    CGSize targetSize = CGSizeMake([self.videoSettings[AVVideoWidthKey] floatValue], [self.videoSettings[AVVideoHeightKey] floatValue]);
-    CGSize naturalSize = [videoTrack naturalSize];
-    CGAffineTransform transform = videoTrack.preferredTransform;
-    CGFloat videoAngleInDegree  = atan2(transform.b, transform.a) * 180 / M_PI;
-    CGRect resultRect = CGRectApplyAffineTransform(CGRectMake(0, 0, naturalSize.width, naturalSize.height), videoTrack.preferredTransform);
-//    NSLog(@"videoAngleInDegree=%f, beforeRect=%@, afterRect=%@", videoAngleInDegree, NSStringFromCGRect(CGRectMake(0, 0, naturalSize.width, naturalSize.height)), NSStringFromCGRect(resultRect));
-    
-    if (videoAngleInDegree == 90 || videoAngleInDegree == -90) {
-        CGRect interRect = CGRectIntersection(resultRect, CGRectMake(0, 0, naturalSize.height, naturalSize.width));
-        if (fabs(interRect.size.width - fabs(naturalSize.width)) > 0.01 || fabs(interRect.size.height - fabs(naturalSize.height)) > 0.01) {
-            // 需要矫正
-            if (videoAngleInDegree == 90 && transform.a == 0.f && transform.b == 1.f && transform.c == -1.f && transform.d == 0.f) {
-                transform.tx = naturalSize.height;
-                transform.ty = 0;
-            } else if (videoAngleInDegree == -90 && transform.a == 0.f && transform.b == -1.f && transform.c == 1.f && transform.d == 0.f) {
-                transform.tx = 0;
-                transform.ty = naturalSize.width;
-            }
-            // 其他情况暂不支持
-        }
-        CGFloat width = naturalSize.width;
-        naturalSize.width = naturalSize.height;
-        naturalSize.height = width;
-    } else if (videoAngleInDegree == 180) {
-        CGRect interRect = CGRectIntersection(resultRect, CGRectMake(0, 0, naturalSize.width, naturalSize.height));
-        if (fabs(interRect.size.width - fabs(naturalSize.width)) > 0.01 || fabs(interRect.size.height - fabs(naturalSize.height)) > 0.01) {
-            if (transform.a == -1.f && transform.b == 0.f && transform.c == 0.f && transform.d == -1.f) {
-                transform.tx = naturalSize.width / 1.f;
-                transform.ty = naturalSize.height / 1.f;
-            }
-        }
-    }
-    if(self.shouldPassThroughNatureSize) {
-        if(naturalSize.width > targetSize.width *1.5) {
-            targetSize = CGSizeMake(targetSize.width *1.5, targetSize.width *1.5 * naturalSize.height / naturalSize.width);
-            //将渲染尺寸适当缩小
-        } else {
-            targetSize = naturalSize;
-        }
-    }
-    videoComposition.renderSize = naturalSize;
-    // center inside
-    {
-        float ratio;
-        float xratio = targetSize.width / naturalSize.width;
-        float yratio = targetSize.height / naturalSize.height;
-        ratio = MIN(xratio, yratio);
-        
-        float postWidth = naturalSize.width * ratio;
-        float postHeight = naturalSize.height * ratio;
-        float transx = (targetSize.width - postWidth) / 2;
-        float transy = (targetSize.height - postHeight) / 2;
-        
-        CGAffineTransform matrix = CGAffineTransformMakeTranslation(transx / xratio, transy / yratio);
-        matrix = CGAffineTransformScale(matrix, ratio / xratio, ratio / yratio);
-        transform = CGAffineTransformConcat(transform, matrix);
-    }
     
     // Make a "pass through video track" video composition.
     AVMutableVideoCompositionInstruction *passThroughInstruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
     passThroughInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, self.asset.duration);
     
-    AVMutableVideoCompositionLayerInstruction *passThroughLayer = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:videoTrack];
+    NSMutableArray *arrayLayerInstruction = [NSMutableArray arrayWithCapacity:2];
     
-    [passThroughLayer setTransform:transform atTime:kCMTimeZero];
+    for (AVAssetTrack *videoTrack in [self.asset tracksWithMediaType:AVMediaTypeVideo]) {
+        
+        // get the frame rate from videoSettings, if not set then try to get it from the video track,
+        // if not set (mainly when asset is AVComposition) then use the default frame rate of 30
+        float trackFrameRate = 0;
+        if (self.videoSettings) {
+            NSDictionary *videoCompressionProperties = [self.videoSettings objectForKey:AVVideoCompressionPropertiesKey];
+            if (videoCompressionProperties)  {
+                NSNumber *maxKeyFrameInterval = [videoCompressionProperties objectForKey:AVVideoMaxKeyFrameIntervalKey];
+                if (maxKeyFrameInterval)  {
+                    trackFrameRate = maxKeyFrameInterval.floatValue;
+                }
+            }
+        } else {
+            trackFrameRate = [videoTrack nominalFrameRate];
+        }
+        
+        if (trackFrameRate == 0) {
+            trackFrameRate = 30;
+        }
+        
+        videoComposition.frameDuration = CMTimeMake(1, trackFrameRate);
+        CGSize targetSize = CGSizeMake([self.videoSettings[AVVideoWidthKey] floatValue], [self.videoSettings[AVVideoHeightKey] floatValue]);
+        CGSize naturalSize = [videoTrack naturalSize];
+        CGAffineTransform transform = videoTrack.preferredTransform;        
+        CGFloat videoAngleInDegree  = atan2(transform.b, transform.a) * 180 / M_PI;
+        
+        
+        CGRect resultRect = CGRectApplyAffineTransform(CGRectMake(0, 0, naturalSize.width, naturalSize.height), videoTrack.preferredTransform);
+        //    NSLog(@"videoAngleInDegree=%f, beforeRect=%@, afterRect=%@", videoAngleInDegree, NSStringFromCGRect(CGRectMake(0, 0, naturalSize.width, naturalSize.height)), NSStringFromCGRect(resultRect));
+        
+        if (videoAngleInDegree == 90 || videoAngleInDegree == -90) {
+            CGRect interRect = CGRectIntersection(resultRect, CGRectMake(0, 0, naturalSize.height, naturalSize.width));
+            if (fabs(interRect.size.width - fabs(naturalSize.width)) > 0.01 || fabs(interRect.size.height - fabs(naturalSize.height)) > 0.01) {
+                // 需要矫正
+                if (videoAngleInDegree == 90 && transform.a == 0.f && transform.b == 1.f && transform.c == -1.f && transform.d == 0.f) {
+                    transform.tx = naturalSize.height;
+                    transform.ty = 0;
+                } else if (videoAngleInDegree == -90 && transform.a == 0.f && transform.b == -1.f && transform.c == 1.f && transform.d == 0.f) {
+                    transform.tx = 0;
+                    transform.ty = naturalSize.width;
+                }
+                // 其他情况暂不支持
+            }
+            CGFloat width = naturalSize.width;
+            naturalSize.width = naturalSize.height;
+            naturalSize.height = width;
+        } else if (videoAngleInDegree == 180) {
+            CGRect interRect = CGRectIntersection(resultRect, CGRectMake(0, 0, naturalSize.width, naturalSize.height));
+            if (fabs(interRect.size.width - fabs(naturalSize.width)) > 0.01 || fabs(interRect.size.height - fabs(naturalSize.height)) > 0.01) {
+                if (transform.a == -1.f && transform.b == 0.f && transform.c == 0.f && transform.d == -1.f) {
+                    transform.tx = naturalSize.width / 1.f;
+                    transform.ty = naturalSize.height / 1.f;
+                }
+            }
+        }
+        if(self.shouldPassThroughNatureSize) {
+            if(naturalSize.width > targetSize.width *1.5) {
+                targetSize = CGSizeMake(targetSize.width *1.5, targetSize.width *1.5 * naturalSize.height / naturalSize.width);
+                //将渲染尺寸适当缩小
+            } else {
+                targetSize = naturalSize;
+            }
+        }
+        videoComposition.renderSize = naturalSize;
+        // center inside
+        {
+            float ratio;
+            float xratio = targetSize.width / naturalSize.width;
+            float yratio = targetSize.height / naturalSize.height;
+            ratio = MIN(xratio, yratio);
+            
+            float postWidth = naturalSize.width * ratio;
+            float postHeight = naturalSize.height * ratio;
+            float transx = (targetSize.width - postWidth) / 2;
+            float transy = (targetSize.height - postHeight) / 2;
+            
+            CGAffineTransform matrix = CGAffineTransformMakeTranslation(transx / xratio, transy / yratio);
+            matrix = CGAffineTransformScale(matrix, ratio / xratio, ratio / yratio);
+            transform = CGAffineTransformConcat(transform, matrix);
+        }
+        
+      
+        
+        AVMutableVideoCompositionLayerInstruction *passThroughLayer = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:videoTrack];
+        
+        [passThroughLayer setTransform:transform atTime:kCMTimeZero];
+        [arrayLayerInstruction addObject:passThroughLayer];
+    }
+
     
-    passThroughInstruction.layerInstructions = @[passThroughLayer];
+    
+    passThroughInstruction.layerInstructions = arrayLayerInstruction;
     videoComposition.instructions = @[passThroughInstruction];
-    
+//    videoComposition.customVideoCompositorClass = [CustomVideoCompositing class];
     return videoComposition;
 }
 
@@ -427,9 +439,6 @@
     self.inputQueue = nil;
     self.completionHandler = nil;
 }
-
-
-
 
 @end
 

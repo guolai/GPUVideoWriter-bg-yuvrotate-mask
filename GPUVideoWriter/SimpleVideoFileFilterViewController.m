@@ -40,7 +40,13 @@
 - (IBAction)btnPressed:(id)sender {
     
 //    [self beginCImageWrite];
-    [self beginOpenglWrite];
+    if(1) {
+        [self beginOpenglWrite];
+//        [self beginOpenglWrite2];
+    } else {
+        [self beginMultiTrackOpenglWrite];
+    }
+
 }
 
 - (void)beginCImageWrite {
@@ -144,7 +150,7 @@
     exporter.videoSettings = [SimpleVideoFileFilterViewController videoSettings:self.videoSize];
     exporter.audioSettings = [SimpleVideoFileFilterViewController audioSettings];
     exporter.shouldPassThroughNatureSize = YES;
-    self.angle = 2.0;
+    self.angle = 45.0;
     NSDate *date = [NSDate date];
     NSLog(@"视频保存 开始");
     __weak typeof(self) weakself = self;
@@ -161,13 +167,15 @@
         [exportSession.videoRenderFilter updateMaskImageFrame:CGRectMake(strongSelf.videoSize.width - 100, strongSelf.videoSize.height - 100, 50, 50)];
         CGAffineTransform transform = CGAffineTransformIdentity;
 
-        transform = CGAffineTransformTranslate(transform,   .0, 1 * strongSelf.videoSize.height/ (strongSelf.videoSize.width));
+//        transform = CGAffineTransformTranslate(transform,   .0, 0.1 * strongSelf.videoSize.height/ (strongSelf.videoSize.width));
+//        transform = CGAffineTransformScale(transform, 1.0, 0.8);
+//        transform = CGAffineTransformRotate(transform, strongSelf.angle*2.0*M_PI/360.0);
         transform = CGAffineTransformScale(transform, 0.5, 0.5);
-//        transform = CGAffineTransformRotate(transform, strongSelf.angle);
+        transform = CGAffineTransformRotate(transform, 30*M_PI_2/180.0);
         
-        strongSelf.angle += 0.1;
-        if(strongSelf.angle > 6.2) {
-            strongSelf.angle = 0.1;
+        strongSelf.angle += 3.0;
+        if(strongSelf.angle > 360) {
+            strongSelf.angle = 0.0;
         }
         exportSession.videoRenderFilter.affineTransform = transform;
         exportSession.videoRenderFilter.assetWriterPixelBufferInput = videoPixelBufferAdaptor;
@@ -210,7 +218,202 @@
    
 }
 
+- (void)beginOpenglWrite2 {
+    self.bUserCIImage = NO;
+    
+//    NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"IMG3" withExtension:@"MOV"];
+        NSURL *sampleURL = [[NSBundle mainBundle] URLForResource:@"hengping" withExtension:@"mp4"];
+    NSString *pathToMovie = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/Movie2.mp4"];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:pathToMovie]) {
+        [[NSFileManager defaultManager] removeItemAtPath:pathToMovie error:nil];
+    }
+    NSURL *movieURL = [NSURL fileURLWithPath:pathToMovie];
+    self.avAsset = [[AVURLAsset alloc] initWithURL:sampleURL options:nil];
+    NSLog(@"%@", pathToMovie);
+    
+    SSZAVAssetExportSession *exporter = [[SSZAVAssetExportSession alloc] initWithAsset:self.avAsset];
+    exporter.shouldOptimizeForNetworkUse = YES;
+    exporter.outputFileType = AVFileTypeMPEG4;
+    exporter.outputURL = movieURL;
+    exporter.videoSettings = [SimpleVideoFileFilterViewController videoSettings:self.videoSize];
+    exporter.audioSettings = [SimpleVideoFileFilterViewController audioSettings];
+    exporter.shouldPassThroughNatureSize = YES;
+    self.angle = 45.0;
+    NSDate *date = [NSDate date];
+    NSLog(@"视频保存 开始");
+    __weak typeof(self) weakself = self;
+    exporter.exportProgressBlock = ^(CGFloat progress) {
+        __strong typeof(self) strongSelf = weakself;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            strongSelf.progressLabel.text = [NSString stringWithFormat:@"%d%%", (int)(progress * 100)];
+        });
+    };
+    exporter.exportHandleSampleBufferBlock = ^BOOL(SSZAVAssetExportSession *exportSession, CMSampleBufferRef sampleBuffer, AVAssetWriterInputPixelBufferAdaptor *videoPixelBufferAdaptor) {
+        __strong typeof(self) strongSelf = weakself;
+        exportSession.videoRenderFilter.bgImage = strongSelf.bgImage;
+        exportSession.videoRenderFilter.maskImage = strongSelf.waterMaskImage;
+        [exportSession.videoRenderFilter updateMaskImageFrame:CGRectMake(strongSelf.videoSize.width - 100, strongSelf.videoSize.height - 100, 50, 50)];
+        CGAffineTransform transform = CGAffineTransformIdentity;
+        
+        //        transform = CGAffineTransformTranslate(transform,   .0, 0.1 * strongSelf.videoSize.height/ (strongSelf.videoSize.width));
+        //        transform = CGAffineTransformScale(transform, 1.0, 0.8);
+        //        transform = CGAffineTransformRotate(transform, strongSelf.angle*2.0*M_PI/360.0);
+        
+        strongSelf.angle += 3.0;
+        if(strongSelf.angle > 360) {
+            strongSelf.angle = 0.0;
+        }
+        exportSession.videoRenderFilter.affineTransform = transform;
+        exportSession.videoRenderFilter.assetWriterPixelBufferInput = videoPixelBufferAdaptor;
+        CVPixelBufferRef processedPixelBuffer = [exportSession.videoRenderFilter renderVideo:sampleBuffer];
+        BOOL bRet = YES;
+        if (![videoPixelBufferAdaptor appendPixelBuffer:processedPixelBuffer withPresentationTime:exportSession.lastSamplePresentationTime]) {
+            bRet = NO;
+            NSLog(@"error 2222");
+        }
+        return bRet;
+    };
+    
+    [exporter exportAsynchronouslyWithCompletionHandler:^(SSZAVAssetExportSession *exportSession){
+        if (exporter.error)  {
+            NSLog(@"视频保存Asset失败：%@", exporter.error);
+        }
+        NSLog(@"视频保存 Asset cost time %f", [[NSDate date] timeIntervalSinceDate:date]);
+        __block NSString *localIdentifier = nil;
+        [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^(void)
+         {
+            PHAssetChangeRequest *request = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:movieURL];
+            request.creationDate = [NSDate date];
+            localIdentifier = request.placeholderForCreatedAsset.localIdentifier;
+        }
+                                          completionHandler:^(BOOL success, NSError *error)
+         {
+            dispatch_async(dispatch_get_main_queue(), ^(void)
+                           {
+                if (error != nil)
+                {
+                    NSLog(@"[SaveTask] save video failed! error: %@", error);
+                }
+                
+                NSLog(@"视频保存本地成功");
+                
+            });
+        }];
+        
+    }];
+    
+}
 
+- (void)beginMultiTrackOpenglWrite {
+    self.bUserCIImage = NO;
+    
+    NSURL *sampleURL1 = [[NSBundle mainBundle] URLForResource:@"IMG3" withExtension:@"MOV"];
+    AVURLAsset *videoAsset1 = [[AVURLAsset alloc] initWithURL:sampleURL1 options:nil];
+    NSURL *sampleURL2 = [[NSBundle mainBundle] URLForResource:@"hengping" withExtension:@"mp4"];
+    AVURLAsset *videoAsset2 = [[AVURLAsset alloc] initWithURL:sampleURL2 options:nil];
+    
+    AVMutableComposition *compostion = [AVMutableComposition composition];
+    NSMutableArray *multiArray = [NSMutableArray arrayWithCapacity:2];
+    [multiArray addObject:videoAsset1];
+    [multiArray addObject:videoAsset2];
+    for (int i = 0; i < multiArray.count; i++) {
+        AVURLAsset *sourceAsset = [multiArray objectAtIndex:i];
+        AVAssetTrack *videoTrack = [[sourceAsset tracksWithMediaType:AVMediaTypeVideo] firstObject];
+        AVAssetTrack *audioTrack = [[sourceAsset tracksWithMediaType:AVMediaTypeAudio] firstObject];
+        AVMutableCompositionTrack *compositionVideoTrack = [compostion addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
+        AVMutableCompositionTrack *compositionAudioTrack = [compostion addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
+        NSError *error = nil;
+        [compositionVideoTrack insertTimeRange:videoTrack.timeRange ofTrack:videoTrack atTime:kCMTimeZero error:&error];
+        if(error){
+            NSLog(@"%@", error);
+        }
+        [compositionAudioTrack insertTimeRange:audioTrack.timeRange ofTrack:audioTrack atTime:kCMTimeZero error:&error];
+    }
+    self.avAsset = compostion;
+    
+    
+    NSString *pathToMovie = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/Movie.mp4"];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:pathToMovie]) {
+        [[NSFileManager defaultManager] removeItemAtPath:pathToMovie error:nil];
+    }
+    NSURL *movieURL = [NSURL fileURLWithPath:pathToMovie];
+   
+    
+    
+    NSLog(@"%@", pathToMovie);
+    
+    SSZAVAssetExportSession *exporter = [[SSZAVAssetExportSession alloc] initWithAsset:self.avAsset];
+    exporter.shouldOptimizeForNetworkUse = YES;
+    exporter.outputFileType = AVFileTypeMPEG4;
+    exporter.outputURL = movieURL;
+    exporter.videoSettings = [SimpleVideoFileFilterViewController videoSettings:self.videoSize];
+    exporter.audioSettings = [SimpleVideoFileFilterViewController audioSettings];
+    exporter.shouldPassThroughNatureSize = YES;
+    self.angle = 45.0;
+    NSDate *date = [NSDate date];
+    NSLog(@"视频保存 开始");
+    __weak typeof(self) weakself = self;
+    exporter.exportProgressBlock = ^(CGFloat progress) {
+        __strong typeof(self) strongSelf = weakself;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            strongSelf.progressLabel.text = [NSString stringWithFormat:@"%d%%", (int)(progress * 100)];
+        });
+    };
+    exporter.exportHandleSampleBufferBlock = ^BOOL(SSZAVAssetExportSession *exportSession, CMSampleBufferRef sampleBuffer, AVAssetWriterInputPixelBufferAdaptor *videoPixelBufferAdaptor) {
+        __strong typeof(self) strongSelf = weakself;
+        exportSession.videoRenderFilter.bgImage = strongSelf.bgImage;
+        exportSession.videoRenderFilter.maskImage = strongSelf.waterMaskImage;
+        [exportSession.videoRenderFilter updateMaskImageFrame:CGRectMake(strongSelf.videoSize.width - 100, strongSelf.videoSize.height - 100, 50, 50)];
+        CGAffineTransform transform = CGAffineTransformIdentity;
+        
+        //        transform = CGAffineTransformTranslate(transform,   .0, 0.1 * strongSelf.videoSize.height/ (strongSelf.videoSize.width));
+        //        transform = CGAffineTransformScale(transform, 1.0, 0.8);
+        //        transform = CGAffineTransformRotate(transform, strongSelf.angle*2.0*M_PI/360.0);
+        
+        strongSelf.angle += 3.0;
+        if(strongSelf.angle > 360) {
+            strongSelf.angle = 0.0;
+        }
+        exportSession.videoRenderFilter.affineTransform = transform;
+        exportSession.videoRenderFilter.assetWriterPixelBufferInput = videoPixelBufferAdaptor;
+        CVPixelBufferRef processedPixelBuffer = [exportSession.videoRenderFilter renderVideo:sampleBuffer];
+        BOOL bRet = YES;
+        if (![videoPixelBufferAdaptor appendPixelBuffer:processedPixelBuffer withPresentationTime:exportSession.lastSamplePresentationTime]) {
+            bRet = NO;
+            NSLog(@"error 2222");
+        }
+        return bRet;
+    };
+    
+    [exporter exportAsynchronouslyWithCompletionHandler:^(SSZAVAssetExportSession *exportSession){
+        if (exporter.error)  {
+            NSLog(@"视频保存Asset失败：%@", exporter.error);
+        }
+        NSLog(@"视频保存 Asset cost time %f", [[NSDate date] timeIntervalSinceDate:date]);
+        __block NSString *localIdentifier = nil;
+        [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^(void)
+         {
+            PHAssetChangeRequest *request = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:movieURL];
+            request.creationDate = [NSDate date];
+            localIdentifier = request.placeholderForCreatedAsset.localIdentifier;
+        }
+                                          completionHandler:^(BOOL success, NSError *error)
+         {
+            dispatch_async(dispatch_get_main_queue(), ^(void)
+                           {
+                if (error != nil)
+                {
+                    NSLog(@"[SaveTask] save video failed! error: %@", error);
+                }
+                
+                NSLog(@"视频保存本地成功");
+                
+            });
+        }];
+        
+    }];
+    
+}
 
 
 - (void)retrievingProgress

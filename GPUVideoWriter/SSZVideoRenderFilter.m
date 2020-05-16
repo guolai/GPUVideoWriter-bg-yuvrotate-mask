@@ -365,8 +365,8 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     glEnableVertexAttribArray(_maskTextureCoordinateAttribute);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-//    glDisableVertexAttribArray(_normalPositionAttribute);
-//    glDisableVertexAttribArray(_normalTextureCoordinateAttribute);
+    glDisableVertexAttribArray(_maskPositionAttribute);
+    glDisableVertexAttribArray(_maskTextureCoordinateAttribute);
 }
 
 - (void)drawMovieFrame {
@@ -420,8 +420,8 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     glEnableVertexAttribArray(_filterPositionAttribute);
     glEnableVertexAttribArray(_filterTextureCoordinateAttribute);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-//    glDisableVertexAttribArray(_filterPositionAttribute);
-//    glDisableVertexAttribArray(_filterTextureCoordinateAttribute);
+    glDisableVertexAttribArray(_filterPositionAttribute);
+    glDisableVertexAttribArray(_filterTextureCoordinateAttribute);
 }
 
 
@@ -429,7 +429,7 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
 
 - (CVPixelBufferRef)renderVideo:(CMSampleBufferRef)sampleBuffer {
     CVPixelBufferRef tmpPixelBuffer = nil;
-    
+     [self useAsCurrentContext];
     if(!_outputFrameBuffer) {
        _outputFrameBuffer = [[SSZGPUFrameBuffer alloc] initWithSize:CGSizeMake(self.videoSize.width, self.videoSize.height)];
        _outputFrameBuffer.coreVideoTextureCache = _coreVideoTextureCache;
@@ -476,8 +476,8 @@ NSString *const kSSZVideoRenderFragmentShaderString1111 = SHADER_STRING
     
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-//    glDisableVertexAttribArray(_normalPositionAttribute);
-//    glDisableVertexAttribArray(_normalTextureCoordinateAttribute);
+    glDisableVertexAttribArray(_normalPositionAttribute);
+    glDisableVertexAttribArray(_normalTextureCoordinateAttribute);
     
     //draw yuv
     CVPixelBufferRef movieFrame = (CVPixelBufferRef)CMSampleBufferGetImageBuffer(sampleBuffer);
