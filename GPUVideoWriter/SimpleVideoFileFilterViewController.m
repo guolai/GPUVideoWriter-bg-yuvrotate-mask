@@ -40,7 +40,7 @@
 - (IBAction)btnPressed:(id)sender {
     
 //    [self beginCImageWrite];
-    if(1) {
+    if(0) {
         [self beginOpenglWrite];
 //        [self beginOpenglWrite2];
     } else {
@@ -307,15 +307,23 @@
 - (void)beginMultiTrackOpenglWrite {
     self.bUserCIImage = NO;
     
-    NSURL *sampleURL1 = [[NSBundle mainBundle] URLForResource:@"IMG3" withExtension:@"MOV"];
+    
+    NSURL *sampleURL1 = [[NSBundle mainBundle] URLForResource:@"IMG_7316" withExtension:@"MOV"];
     AVURLAsset *videoAsset1 = [[AVURLAsset alloc] initWithURL:sampleURL1 options:nil];
-    NSURL *sampleURL2 = [[NSBundle mainBundle] URLForResource:@"hengping" withExtension:@"mp4"];
+    NSURL *sampleURL2 = [[NSBundle mainBundle] URLForResource:@"IMG2" withExtension:@"MOV"];
     AVURLAsset *videoAsset2 = [[AVURLAsset alloc] initWithURL:sampleURL2 options:nil];
     
+//
+//    NSURL *sampleURL1 = [[NSBundle mainBundle] URLForResource:@"douyin" withExtension:@"mp4"];
+//    AVURLAsset *videoAsset1 = [[AVURLAsset alloc] initWithURL:sampleURL1 options:nil];
+//    NSURL *sampleURL2 = [[NSBundle mainBundle] URLForResource:@"testvideo3" withExtension:@"mp4"];
+//    AVURLAsset *videoAsset2 = [[AVURLAsset alloc] initWithURL:sampleURL2 options:nil];
+//
     AVMutableComposition *compostion = [AVMutableComposition composition];
     NSMutableArray *multiArray = [NSMutableArray arrayWithCapacity:2];
     [multiArray addObject:videoAsset1];
     [multiArray addObject:videoAsset2];
+    
     for (int i = 0; i < multiArray.count; i++) {
         AVURLAsset *sourceAsset = [multiArray objectAtIndex:i];
         AVAssetTrack *videoTrack = [[sourceAsset tracksWithMediaType:AVMediaTypeVideo] firstObject];
@@ -323,11 +331,24 @@
         AVMutableCompositionTrack *compositionVideoTrack = [compostion addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
         AVMutableCompositionTrack *compositionAudioTrack = [compostion addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
         NSError *error = nil;
-        [compositionVideoTrack insertTimeRange:videoTrack.timeRange ofTrack:videoTrack atTime:kCMTimeZero error:&error];
+        CMTimeRange videoTimerange = videoTrack.timeRange;
+        CMTime videoStarttime = kCMTimeZero;
+        CMTimeRange audioTimerange = audioTrack.timeRange;
+        CMTime audioStarttime = kCMTimeZero;
+        if(i == 0) {
+            videoTimerange  = CMTimeRangeMake(CMTimeMake(2.0 * 100, 100), CMTimeMake(8*100, 100));
+            audioTimerange  = CMTimeRangeMake(CMTimeMake(2.0 * 100, 100), CMTimeMake(8*100, 100));
+        } else {
+            videoTimerange  = CMTimeRangeMake(CMTimeMake(5.0 * 100, 100), CMTimeMake(5*100, 100));
+            audioTimerange  = CMTimeRangeMake(CMTimeMake(5.0 * 100, 100), CMTimeMake(5*100, 100));
+            videoStarttime = CMTimeMake(8 * 100, 100);
+            audioStarttime = CMTimeMake(8 * 100, 100);
+        }
+        [compositionVideoTrack insertTimeRange:videoTimerange ofTrack:videoTrack atTime:videoStarttime error:&error];
         if(error){
             NSLog(@"%@", error);
         }
-        [compositionAudioTrack insertTimeRange:audioTrack.timeRange ofTrack:audioTrack atTime:kCMTimeZero error:&error];
+        [compositionAudioTrack insertTimeRange:audioTimerange ofTrack:audioTrack atTime:audioStarttime error:&error];
     }
     self.avAsset = compostion;
     
@@ -365,11 +386,11 @@
         exportSession.videoRenderFilter.maskImage = strongSelf.waterMaskImage;
         [exportSession.videoRenderFilter updateMaskImageFrame:CGRectMake(strongSelf.videoSize.width - 100, strongSelf.videoSize.height - 100, 50, 50)];
         CGAffineTransform transform = CGAffineTransformIdentity;
-        
+
         //        transform = CGAffineTransformTranslate(transform,   .0, 0.1 * strongSelf.videoSize.height/ (strongSelf.videoSize.width));
         //        transform = CGAffineTransformScale(transform, 1.0, 0.8);
         //        transform = CGAffineTransformRotate(transform, strongSelf.angle*2.0*M_PI/360.0);
-        
+
         strongSelf.angle += 3.0;
         if(strongSelf.angle > 360) {
             strongSelf.angle = 0.0;
@@ -384,7 +405,7 @@
         }
         return bRet;
     };
-    
+
     [exporter exportAsynchronouslyWithCompletionHandler:^(SSZAVAssetExportSession *exportSession){
         if (exporter.error)  {
             NSLog(@"视频保存Asset失败：%@", exporter.error);

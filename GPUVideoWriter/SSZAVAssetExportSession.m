@@ -100,7 +100,8 @@
         if (self.videoComposition) {
             self.videoOutput.videoComposition = self.videoComposition;
         } else {
-            self.videoOutput.videoComposition = [self buildDefaultVideoComposition];
+//            self.videoOutput.videoComposition = [self buildDefaultVideoComposition];
+            self.videoOutput.videoComposition = [AVVideoComposition videoCompositionWithPropertiesOfAsset:self.reader.asset];
         }
         if ([self.reader canAddOutput:self.videoOutput]) {
             [self.reader addOutput:self.videoOutput];
@@ -200,11 +201,20 @@
                 handled = YES;
                 error = YES;
             }
+            if(self.videoOutput == output) {
+                static NSInteger videocount = 1;
+                NSLog(@"current video Time======:%f , %ld",CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer)), videocount);
+                videocount++;
+            } else {
+                static NSInteger audiocount = 1;
+                NSLog(@"current audio Time------:%f, %ld",CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer)), audiocount);
+                audiocount++;
+            }
             
             if (!handled && self.videoOutput == output) {
                 // update the video progress
                 _lastSamplePresentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-                NSLog(@"current time %f", CMTimeGetSeconds(_lastSamplePresentationTime));
+//                NSLog(@"current time %f", CMTimeGetSeconds(_lastSamplePresentationTime));
                 _lastSamplePresentationTime = CMTimeSubtract(_lastSamplePresentationTime, self.timeRange.start);
                 self.progress = _duration == 0 ? 1 : CMTimeGetSeconds(_lastSamplePresentationTime) / _duration;
                 if (self.exportProgressBlock) {
