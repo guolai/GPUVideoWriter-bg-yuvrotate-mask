@@ -315,6 +315,8 @@
     AVURLAsset *videoAsset2 = [[AVURLAsset alloc] initWithURL:sampleURL2 options:nil];
     NSURL *sampleURL3 = [[NSBundle mainBundle] URLForResource:@"hengping" withExtension:@"mp4"];
     AVURLAsset *videoAsset3 = [[AVURLAsset alloc] initWithURL:sampleURL3 options:nil];
+    NSURL *sampleURL4 = [[NSBundle mainBundle] URLForResource:@"douyin3" withExtension:@"mp4"];
+    AVURLAsset *videoAsset4 = [[AVURLAsset alloc] initWithURL:sampleURL4 options:nil];
 //
 ////
 //    NSURL *sampleURL1 = [[NSBundle mainBundle] URLForResource:@"douyin" withExtension:@"mp4"];
@@ -326,7 +328,8 @@
     NSMutableArray *multiArray = [NSMutableArray arrayWithCapacity:2];
     [multiArray addObject:videoAsset1];
     [multiArray addObject:videoAsset2];
-//    [multiArray addObject:videoAsset3];
+    [multiArray addObject:videoAsset3];
+    [multiArray addObject:videoAsset4];
     CMTime videoStarttime = kCMTimeZero;
     CMTime audioStarttime = kCMTimeZero;
     for (int i = 0; i < multiArray.count; i++) {
