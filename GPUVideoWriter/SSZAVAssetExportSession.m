@@ -22,6 +22,8 @@
 @property (nonatomic, strong) AVAssetWriterInput *audioInput;
 @property (nonatomic, strong) dispatch_queue_t inputQueue;
 @property (nonatomic, assign, readwrite) CMTime lastSamplePresentationTime;
+@property (nonatomic, assign, readwrite) CMTime lastVideoTime;
+@property (nonatomic, assign, readwrite) CMTime lastAudioTime;
 @property (nonatomic, strong) void (^completionHandler)(SSZAVAssetExportSession *);
 @property (nonatomic, strong, readwrite) SSZVideoRenderFilter *videoRenderFilter;
 
@@ -203,12 +205,32 @@
             }
             if(self.videoOutput == output) {
                 static NSInteger videocount = 1;
+//                self.lastVideoTime =
                 NSLog(@"current video Time======:%f , %ld",CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer)), videocount);
                 videocount++;
             } else {
                 static NSInteger audiocount = 1;
                 NSLog(@"current audio Time------:%f, %ld",CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer)), audiocount);
                 audiocount++;
+            }
+            while (self.videoInput.readyForMoreMediaData == NO && self.videoInput == input && !handled) {
+                if (self.writer.status != AVAssetWriterStatusWriting)
+                {
+                    return NO;
+                }
+                
+                usleep(10000);
+                NSLog(@"sleep on writing video");
+            }
+            
+            while (self.audioInput.readyForMoreMediaData == NO && self.audioInput == input && !handled) {
+                if (self.writer.status != AVAssetWriterStatusWriting)
+                {
+                    return NO;
+                }
+                
+                usleep(10000);
+                NSLog(@"sleep on writing audio");
             }
             
             if (!handled && self.videoOutput == output) {
@@ -224,7 +246,7 @@
                     handled = self.exportHandleSampleBufferBlock(self, sampleBuffer, self.videoPixelBufferAdaptor);
                 }
             }
-            
+          
             @try {
                 if (!handled && ![input appendSampleBuffer:sampleBuffer]) {
                     error = YES;

@@ -308,12 +308,15 @@
     self.bUserCIImage = NO;
     
     
-    NSURL *sampleURL1 = [[NSBundle mainBundle] URLForResource:@"IMG_7316" withExtension:@"MOV"];
-    AVURLAsset *videoAsset1 = [[AVURLAsset alloc] initWithURL:sampleURL1 options:nil];
-    NSURL *sampleURL2 = [[NSBundle mainBundle] URLForResource:@"IMG2" withExtension:@"MOV"];
-    AVURLAsset *videoAsset2 = [[AVURLAsset alloc] initWithURL:sampleURL2 options:nil];
     
+    NSURL *sampleURL1 = [[NSBundle mainBundle] URLForResource:@"douyin1" withExtension:@"mp4"];
+    AVURLAsset *videoAsset1 = [[AVURLAsset alloc] initWithURL:sampleURL1 options:nil];
+    NSURL *sampleURL2 = [[NSBundle mainBundle] URLForResource:@"douyin2" withExtension:@"mp4"];
+    AVURLAsset *videoAsset2 = [[AVURLAsset alloc] initWithURL:sampleURL2 options:nil];
+    NSURL *sampleURL3 = [[NSBundle mainBundle] URLForResource:@"hengping" withExtension:@"mp4"];
+    AVURLAsset *videoAsset3 = [[AVURLAsset alloc] initWithURL:sampleURL3 options:nil];
 //
+////
 //    NSURL *sampleURL1 = [[NSBundle mainBundle] URLForResource:@"douyin" withExtension:@"mp4"];
 //    AVURLAsset *videoAsset1 = [[AVURLAsset alloc] initWithURL:sampleURL1 options:nil];
 //    NSURL *sampleURL2 = [[NSBundle mainBundle] URLForResource:@"testvideo3" withExtension:@"mp4"];
@@ -323,7 +326,9 @@
     NSMutableArray *multiArray = [NSMutableArray arrayWithCapacity:2];
     [multiArray addObject:videoAsset1];
     [multiArray addObject:videoAsset2];
-    
+//    [multiArray addObject:videoAsset3];
+    CMTime videoStarttime = kCMTimeZero;
+    CMTime audioStarttime = kCMTimeZero;
     for (int i = 0; i < multiArray.count; i++) {
         AVURLAsset *sourceAsset = [multiArray objectAtIndex:i];
         AVAssetTrack *videoTrack = [[sourceAsset tracksWithMediaType:AVMediaTypeVideo] firstObject];
@@ -332,23 +337,22 @@
         AVMutableCompositionTrack *compositionAudioTrack = [compostion addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
         NSError *error = nil;
         CMTimeRange videoTimerange = videoTrack.timeRange;
-        CMTime videoStarttime = kCMTimeZero;
         CMTimeRange audioTimerange = audioTrack.timeRange;
-        CMTime audioStarttime = kCMTimeZero;
-        if(i == 0) {
-            videoTimerange  = CMTimeRangeMake(CMTimeMake(2.0 * 100, 100), CMTimeMake(8*100, 100));
-            audioTimerange  = CMTimeRangeMake(CMTimeMake(2.0 * 100, 100), CMTimeMake(8*100, 100));
-        } else {
-            videoTimerange  = CMTimeRangeMake(CMTimeMake(5.0 * 100, 100), CMTimeMake(5*100, 100));
-            audioTimerange  = CMTimeRangeMake(CMTimeMake(5.0 * 100, 100), CMTimeMake(5*100, 100));
-            videoStarttime = CMTimeMake(8 * 100, 100);
-            audioStarttime = CMTimeMake(8 * 100, 100);
-        }
+        
+//        if(i == 0) {
+//            videoTimerange  = CMTimeRangeMake(CMTimeMake(2.0 * 100, 100), CMTimeMake(8*100, 100));
+//            audioTimerange  = CMTimeRangeMake(CMTimeMake(2.0 * 100, 100), CMTimeMake(8*100, 100));
+//        } else if (i == 1) {
+//            videoTimerange  = CMTimeRangeMake(CMTimeMake(5.0 * 100, 100), CMTimeMake(5*100, 100));
+//            audioTimerange  = CMTimeRangeMake(CMTimeMake(5.0 * 100, 100), CMTimeMake(5*100, 100));
+//            videoStarttime = CMTimeMake(8 * 100, 100);
+//            audioStarttime = CMTimeMake(8 * 100, 100);
+
+//        }
         [compositionVideoTrack insertTimeRange:videoTimerange ofTrack:videoTrack atTime:videoStarttime error:&error];
-        if(error){
-            NSLog(@"%@", error);
-        }
         [compositionAudioTrack insertTimeRange:audioTimerange ofTrack:audioTrack atTime:audioStarttime error:&error];
+        videoStarttime = CMTimeAdd(videoStarttime, videoTimerange.duration);
+        audioStarttime = CMTimeAdd(audioStarttime, audioTimerange.duration);
     }
     self.avAsset = compostion;
     
@@ -473,10 +477,10 @@
     //                 AVVideoMaxKeyFrameIntervalKey: @25,
     //                 },
     //             };
-    NSDictionary *properties = @{ AVVideoAverageBitRateKey : @(1500*1024),
+    NSDictionary *properties = @{ AVVideoAverageBitRateKey : @(1945748),
                                   AVVideoExpectedSourceFrameRateKey : @(30),
-                                  AVVideoMaxKeyFrameIntervalKey : @(30),
-                                  AVVideoProfileLevelKey: AVVideoProfileLevelH264High41,
+                                  AVVideoMaxKeyFrameIntervalKey : @(250),
+                                  AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
                                   AVVideoAllowFrameReorderingKey : @(NO)
                                   };
     NSDictionary *videoSettings = @{
@@ -490,12 +494,22 @@
 
 + (NSDictionary *)audioSettings
 {
-    return @{
-             AVFormatIDKey: @(kAudioFormatMPEG4AAC),
-             AVNumberOfChannelsKey: @2,
-             AVSampleRateKey: @44100,
-             AVEncoderBitRateKey: @64000,
-             };
+    AudioChannelLayout acl;
+    bzero( &acl, sizeof(acl));
+    acl.mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
+    NSData *channelLayoutAsData = [NSData dataWithBytes:&acl length:sizeof(acl)];
+    
+    return @{AVFormatIDKey: @(kAudioFormatMPEG4AAC),
+             AVSampleRateKey: @(48000),
+             AVEncoderBitRateKey: @(128000),
+             AVChannelLayoutKey: channelLayoutAsData,
+             AVNumberOfChannelsKey: @(2)};
+//    return @{
+//             AVFormatIDKey: @(kAudioFormatMPEG4AAC),
+//             AVNumberOfChannelsKey: @2,
+//             AVSampleRateKey: @48000,
+//             AVEncoderBitRateKey: @128000,
+//             };
 }
 
 //视频格式
