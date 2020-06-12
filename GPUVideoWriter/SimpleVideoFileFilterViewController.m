@@ -416,28 +416,30 @@
         }
         NSLog(@"视频保存 Asset cost time %f", [[NSDate date] timeIntervalSinceDate:date]);
         __block NSString *localIdentifier = nil;
-        [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^(void)
-         {
-            PHAssetChangeRequest *request = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:movieURL];
-            request.creationDate = [NSDate date];
-            localIdentifier = request.placeholderForCreatedAsset.localIdentifier;
-        }
-                                          completionHandler:^(BOOL success, NSError *error)
-         {
-            dispatch_async(dispatch_get_main_queue(), ^(void)
-                           {
-                if (error != nil)
-                {
-                    NSLog(@"[SaveTask] save video failed! error: %@", error);
-                }
-                
-                NSLog(@"视频保存本地成功");
-                
-            });
-        }];
-        
+//        [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^(void)
+//         {
+//            PHAssetChangeRequest *request = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:movieURL];
+//            request.creationDate = [NSDate date];
+//            localIdentifier = request.placeholderForCreatedAsset.localIdentifier;
+//        }
+//                                          completionHandler:^(BOOL success, NSError *error)
+//         {
+//            dispatch_async(dispatch_get_main_queue(), ^(void)
+//                           {
+//                if (error != nil)
+//                {
+//                    NSLog(@"[SaveTask] save video failed! error: %@", error);
+//                }
+//
+//                NSLog(@"视频保存本地成功");
+//
+//            });
+//        }];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self beginMultiTrackOpenglWrite];
+        });
     }];
-    
+  
 }
 
 

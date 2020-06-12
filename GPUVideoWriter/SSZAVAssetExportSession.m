@@ -21,11 +21,20 @@
 @property (nonatomic, strong) AVAssetWriterInputPixelBufferAdaptor *videoPixelBufferAdaptor;
 @property (nonatomic, strong) AVAssetWriterInput *audioInput;
 @property (nonatomic, strong) dispatch_queue_t inputQueue;
+@property (nonatomic, strong) dispatch_queue_t audioInputQueue;
 @property (nonatomic, assign, readwrite) CMTime lastSamplePresentationTime;
 @property (nonatomic, assign, readwrite) CMTime lastVideoTime;
 @property (nonatomic, assign, readwrite) CMTime lastAudioTime;
 @property (nonatomic, strong) void (^completionHandler)(SSZAVAssetExportSession *);
 @property (nonatomic, strong, readwrite) SSZVideoRenderFilter *videoRenderFilter;
+@property (nonatomic, strong) CADisplayLink *displayLink;
+@property (nonatomic, assign) NSUInteger videoCount;
+@property (nonatomic, assign) NSUInteger audioCount;
+@property (nonatomic, assign, readwrite) NSTimeInterval currentTime;
+@property (nonatomic, assign, readwrite) CMTime targetFrameDuration;
+@property (nonatomic, assign) CMSampleBufferRef videoSampleBuffer;
+@property (nonatomic, assign) CMSampleBufferRef audioSampleBuffer;
+
 
 
 @end
@@ -160,35 +169,260 @@
     __weak typeof(self) wself = self;
     NSString *str = [NSString stringWithFormat:@"VideoEncoderInputQueue-%p",self];
     self.inputQueue = dispatch_queue_create([str UTF8String], DISPATCH_QUEUE_SERIAL);
-    if (videoTracks.count > 0) {
-        [self.videoInput requestMediaDataWhenReadyOnQueue:self.inputQueue usingBlock:^{
-             if (![wself encodeReadySamplesFromOutput:wself.videoOutput toInput:wself.videoInput]) {
-                 @synchronized(wself) {
-                     videoCompleted = YES;
-                     if (audioCompleted)  {
-                         [wself finish];
+    str = [NSString stringWithFormat:@"AudioEncoderInputQueue-%p",self];
+    self.audioInputQueue = dispatch_queue_create([str UTF8String], DISPATCH_QUEUE_SERIAL);
+    if(0) {
+        if (videoTracks.count > 0) {
+            [self.videoInput requestMediaDataWhenReadyOnQueue:self.inputQueue usingBlock:^{
+                 if (![wself encodeReadySamplesFromOutput:wself.videoOutput toInput:wself.videoInput]) {
+                     @synchronized(wself) {
+                         videoCompleted = YES;
+                         if (audioCompleted)  {
+                             [wself finish];
+                         }
                      }
                  }
-             }
-         }];
-    } else {
-        videoCompleted = YES;
+             }];
+        } else {
+            videoCompleted = YES;
+        }
+    
+        if (!self.audioOutput) {
+            audioCompleted = YES;
+        } else {
+            [self.audioInput requestMediaDataWhenReadyOnQueue:self.inputQueue usingBlock:^{
+                 if (![wself encodeReadySamplesFromOutput:wself.audioOutput toInput:wself.audioInput]) {
+                     @synchronized(wself)  {
+                         audioCompleted = YES;
+                         if (videoCompleted) {
+                             [wself finish];
+                         }
+                     }
+                 }
+             }];
+        }
+    } else if(1) {
+        self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
+        [self.displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+        [self.displayLink setPreferredFramesPerSecond:30];
+        [self.displayLink setPaused:NO];
+    } else if(1) {
+        dispatch_async(self.inputQueue, ^{
+            [self doExportTask];
+        });
+    }
+}
+
+- (void)doExportTask {
+    self.targetFrameDuration = CMTimeMake(6000/30, 6000);
+    self.currentTime = 0.0;
+    CMTime tmpTime = CMTimeMake(self.currentTime * 6000, 6000);
+    NSLog(@" currentTime = %.4f,%.4f", self.currentTime, CMTimeGetSeconds(tmpTime));
+    [self updateWithTime:tmpTime];
+}
+
+- (void)updateWithTime:(CMTime)time {
+    [self doVideoExportTask:time];
+    dispatch_async(self.audioInputQueue, ^{
+         [self doAudioExportTask:time];
+    });
+   
+    
+}
+
+
+
+- (void)increaseTime {
+    self.currentTime += CMTimeGetSeconds(self.targetFrameDuration);
+    CMTime tmpTime = CMTimeMake(self.currentTime * 6000, 6000);
+    NSLog(@" currentTime = %.4f,%.4f", self.currentTime, CMTimeGetSeconds(tmpTime));
+    NSTimeInterval duration = CMTimeGetSeconds(self.asset.duration);
+    if(self.currentTime >= duration - 0.034) {
+        [self.videoInput markAsFinished];
+        [self.audioInput markAsFinished];
+        [self finish];
+        return;
+    }
+    [self updateWithTime:tmpTime];
+}
+
+- (void)setVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer {
+    if(sampleBuffer &&  _videoSampleBuffer == sampleBuffer) {
+        return;
+    }
+    if(sampleBuffer) {
+        CFRetain(sampleBuffer);
+    }
+    if(_videoSampleBuffer) {
+        CFRelease(_videoSampleBuffer);
+        _videoSampleBuffer = nil;
+    }
+    _videoSampleBuffer = sampleBuffer;
+}
+
+- (void)setAudioSampleBuffer:(CMSampleBufferRef)sampleBuffer {
+    if(sampleBuffer &&  _audioSampleBuffer == sampleBuffer) {
+        return;
+    }
+    if(sampleBuffer) {
+        CFRetain(sampleBuffer);
+    }
+    if(_audioSampleBuffer) {
+        CFRelease(_audioSampleBuffer);
+        _audioSampleBuffer = nil;
+    }
+    _audioSampleBuffer = sampleBuffer;
+}
+
+- (void)doVideoExportTask:(CMTime)time {
+    CMSampleBufferRef sampleBuffer = self.videoSampleBuffer;
+    if(!sampleBuffer) {
+        sampleBuffer = [self.videoOutput copyNextSampleBuffer];
+        if(sampleBuffer) {
+            self.videoSampleBuffer = sampleBuffer;
+        }
     }
     
-    if (!self.audioOutput) {
-        audioCompleted = YES;
-    } else {
-        [self.audioInput requestMediaDataWhenReadyOnQueue:self.inputQueue usingBlock:^{
-             if (![wself encodeReadySamplesFromOutput:wself.audioOutput toInput:wself.audioInput]) {
-                 @synchronized(wself)  {
-                     audioCompleted = YES;
-                     if (videoCompleted) {
-                         [wself finish];
-                     }
-                 }
-             }
-         }];
+    NSAssert(self.videoSampleBuffer, @"error");
+    
+    
+    
+    while (self.videoInput.readyForMoreMediaData == NO)
+    {
+        if (_writer.status != AVAssetWriterStatusWriting)
+        {
+            NSLog(@"3333333");
+            return;
+        }
+        
+        usleep(10000);
+        NSLog(@"sleep on writing video");
+        
     }
+    
+    if (sampleBuffer) {
+        BOOL handled = NO;
+        BOOL error = NO;
+        
+        if (self.reader.status != AVAssetReaderStatusReading ||
+            self.writer.status != AVAssetWriterStatusWriting) {
+            handled = YES;
+            error = YES;
+        }
+        
+        if (!handled) {
+            // update the video progress
+            CMTime presentationTime = CMSampleBufferGetPresentationTimeStamp(self.videoSampleBuffer);
+            
+            _lastSamplePresentationTime = time;
+            NSLog(@"current time %f, %f", CMTimeGetSeconds(_lastSamplePresentationTime), CMTimeGetSeconds(presentationTime));
+            self.progress = _duration == 0 ? 1 : CMTimeGetSeconds(_lastSamplePresentationTime) / _duration;
+            if (self.exportProgressBlock) {
+                self.exportProgressBlock(self.progress);
+            }
+            if(self.exportHandleSampleBufferBlock) {
+                handled = self.exportHandleSampleBufferBlock(self, sampleBuffer, self.videoPixelBufferAdaptor);
+            }
+        }
+        
+        
+        if (!handled && ![self.videoInput appendSampleBuffer:self.videoSampleBuffer]) {
+            error = YES;
+            NSLog(@"error 222");
+            [self.videoInput markAsFinished];
+        }
+        self.videoSampleBuffer = nil;
+        CFRelease(sampleBuffer);
+        NSLog(@"222222");
+        if(!error) {
+            dispatch_async(self.inputQueue, ^{
+                [self increaseTime];
+            });
+        }
+    } else {
+        NSLog(@"error 111");
+        [self.videoInput markAsFinished];
+    }
+    
+}
+
+- (void)doAudioExportTask:(CMTime)time {
+    CMSampleBufferRef sampleBuffer = self.audioSampleBuffer;
+    if(!sampleBuffer) {
+        sampleBuffer = [self.audioOutput copyNextSampleBuffer];
+        if(sampleBuffer) {
+            self.audioSampleBuffer = sampleBuffer;
+        }
+    }
+  
+    if(!self.audioSampleBuffer) {
+        [self.audioInput markAsFinished];
+        return;
+    }
+    NSAssert(self.audioSampleBuffer, @"error");
+    CMTime lastSamplePresentationTime = CMSampleBufferGetPresentationTimeStamp(self.audioSampleBuffer);
+    NSLog(@"audio sample time1:%@, realtime:%@", [NSValue valueWithCMTime:lastSamplePresentationTime], [NSValue valueWithCMTime:time]);
+    NSTimeInterval nDiff = CMTimeGetSeconds(CMTimeSubtract(lastSamplePresentationTime, time));
+    NSTimeInterval minDuration = 5.0;
+    if(nDiff > minDuration) {
+        return;
+
+    }
+    
+    while (self.audioInput.readyForMoreMediaData == NO)
+    {
+        if (_writer.status != AVAssetWriterStatusWriting)
+        {
+            NSLog(@"3333333 audio");
+            return;
+        }
+        
+        usleep(100000);
+        NSLog(@"sleep on writing aduio");
+        
+    }
+    
+    if (sampleBuffer) {
+        BOOL handled = NO;
+        BOOL error = NO;
+        
+        if (self.reader.status != AVAssetReaderStatusReading ||
+            self.writer.status != AVAssetWriterStatusWriting) {
+            handled = YES;
+            error = YES;
+        }
+        
+        if (!handled && ![self.audioInput appendSampleBuffer:self.audioSampleBuffer]) {
+            error = YES;
+            NSLog(@"error 222 audio");
+            [self.audioInput markAsFinished];
+        }
+        self.audioSampleBuffer = nil;
+        CFRelease(sampleBuffer);
+        NSLog(@"222222 audio");
+        if(!error) {
+        }
+    } else {
+        NSLog(@"error 111 audio");
+        [self.audioInput markAsFinished];
+    }
+    
+}
+
+- (void)displayLinkCallback:(CADisplayLink *)sender {
+    NSTimeInterval currentTime = CMTimeGetSeconds(_lastSamplePresentationTime);
+    NSTimeInterval duration = CMTimeGetSeconds(self.asset.duration);
+    if(currentTime >= duration - 0.034) {
+        [self.videoInput markAsFinished];
+        [self.audioInput markAsFinished];
+        [self finish];
+        [self.displayLink setPaused:YES];
+        [self.displayLink invalidate];
+        return;
+    }
+    [self encodeReadySamplesFromOutput:self.videoOutput toInput:self.videoInput];
+    [self encodeReadySamplesFromOutput:self.audioOutput toInput:self.audioInput];
+    
 }
 
 - (BOOL)encodeReadySamplesFromOutput:(AVAssetReaderOutput *)output toInput:(AVAssetWriterInput *)input {
